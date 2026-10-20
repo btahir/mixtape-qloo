@@ -255,6 +255,7 @@ it.each([false, true])("matched evaluator checkpoints both arms including denied
     const step = isBaseline ? ++baselineStep : ++qlooStep;
     let content: LanguageModelV4GenerateResult["content"];
     if (isBaseline) {
+      expect(params.toolChoice).toEqual({ type: step <= 2 ? "required" : "none" });
       content = step <= 2 ? [{ type: "tool-call", toolCallId: `b-${step}`, toolName: "validateChoices", input: JSON.stringify({ choices: step === 1 ? [] : selections }) }] : [{ type: "text", text: JSON.stringify({ choices: selections }) }];
     } else if (step === 1) {
       content = [{ type: "tool-call" as const, toolCallId: "rank", toolName: "rankNeededSlots", input: JSON.stringify({ revision: d.version }) }];

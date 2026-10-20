@@ -8,8 +8,9 @@ import { hosted } from "./deployment";
 import { inputFingerprint } from "../agent/tools";
 import { hash } from "./security";
 import { ensureQlooAccess } from "./limits";
-/** Private access-spike output, never a public repository fixture. No public
- * route can install a manifest. Lookup alone dispatches no Qloo/model request. */
+/** Release-hydrated editorial records stay in project storage. Only reviewed
+ * catalog identity references are bundled; public routes cannot install records.
+ * Lookup alone dispatches no Qloo/model request. */
 export const liveSampleSchema = z
   .object({
     sampleId: z.enum([
@@ -38,7 +39,7 @@ export async function liveSample(
 ): Promise<Pick<Draft, "shelf" | "tastes"> | null> {
   if (
     process.env.QLOO_MODE === "fixture" || !process.env.QLOO_API_KEY ||
-    process.env.QLOO_EVENT_ACCESS_CONFIRMED !== "true"
+    process.env.QLOO_EVENT_ACCESS_CONFIRMED === "false"
   )
     return null;
   ensureQlooAccess();

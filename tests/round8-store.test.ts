@@ -2,7 +2,7 @@ import { expect, it, vi } from "vitest";
 import { spawn } from "node:child_process";
 import { kv } from "@shiptiffin/sdk/kv";
 import { RedisStore } from "@/lib/server/store";
-import { reserve, qlooAttempt, ledgerKey } from "@/lib/server/limits";
+import { reserve, qlooAttempt, ledgerKey, provisionAllowance } from "@/lib/server/limits";
 
 // Opt-in integration regression; isolated local Redis only, no provider access.
 it.skipIf(process.env.MIXTAPE_KV_PRESSURE_TEST !== "true")("retains budgets under cache pressure, fails closed on ledger loss, and collects expired durable records", async () => {
@@ -15,15 +15,22 @@ it.skipIf(process.env.MIXTAPE_KV_PRESSURE_TEST !== "true")("retains budgets unde
     expect(child.exitCode).toBeNull();
     const db = kv({ url: `redis://127.0.0.1:${port}`, prefix: "mixtape-r8-test:", json: false });
     const storage = new RedisStore(db);
+    await provisionAllowance(storage);
     await reserve("first", "one", true, storage);
     await qlooAttempt(storage);
     expect(await db.command("PTTL", db.key(`mixtape:${ledgerKey}`))).toBe(-1);
+    expect(await db.command("PTTL", db.key("mixtape:allowance:v1"))).toBe(-1);
     expect(await db.command("PTTL", db.key("mixtape:reservation:first"))).toBe(-1);
     const used = Number(String(await db.command("INFO", "memory")).match(/used_memory:(\d+)/)![1]);
     await db.command("CONFIG", "SET", "maxmemory", String(used + 1048576));
     for (let i = 0; i < 100; i++) await storage.cas(`cache:pressure-${i}`, null, "x".repeat(20000), 60000);
-    expect(await storage.get("cache:pressure-0")).toBeNull();
+    // Valkey's LRU is sampled, so a particular oldest key is not guaranteed.
+    const cached = await Promise.all(Array.from({ length: 100 }, (_, i) => storage.get(`cache:pressure-${i}`)));
+    expect(cached.filter((value) => value === null).length).toBeGreaterThan(0);
     expect(JSON.parse((await storage.get(ledgerKey))!).qlooTotal).toBe(1);
+    const ledgerBeforeRedeploy = await storage.get(ledgerKey);
+    await provisionAllowance(storage);
+    expect(await storage.get(ledgerKey)).toBe(ledgerBeforeRedeploy);
     await db.command("CONFIG", "SET", "maxmemory", "0");
     await reserve("second", "two", true, storage);
     await qlooAttempt(storage);

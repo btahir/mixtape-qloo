@@ -27,7 +27,7 @@ bun --bun next dev
 
 Open http://localhost:3000. Leave optional entries empty; leave runtime-managed `NODE_ENV` and `PORT` unset. With no credentials, sample mode works offline. Without Valkey, local drafts and links live in memory and disappear on restart.
 
-For live generation, set `QLOO_API_KEY` and `ANTHROPIC_API_KEY`, confirm `QLOO_EVENT_ACCESS_CONFIRMED` and set the verified `QLOO_ACCESS_EXPIRES_AT`. Live starter gifts also need privately reviewed manifests; see [configuration](docs/configuration.md). Every supported variable is listed, without values, in [.env.example](.env.example).
+For live generation, set `QLOO_API_KEY` and `ANTHROPIC_API_KEY`. To install the live starters and comparisons, connect an isolated local Valkey and run `bun run release`; see [configuration](docs/configuration.md). Every supported variable is listed, without values, in [.env.example](.env.example).
 
 ```sh
 bun run typecheck
@@ -45,10 +45,21 @@ Storage tests require `redis-server` on PATH and start isolated local instances.
 
 [tiffin.config.ts](tiffin.config.ts) declares project `mixtape` and one Next.js `web` app at `.`. ShipTiffin builds and starts it on Bun and supplies the Next.js adapter and project services. No custom service options or database migrations are needed.
 
-1. Configure `QLOO_API_KEY`, `ANTHROPIC_API_KEY` and a stable random `SESSION_SECRET` of at least 32 characters as project secrets.
-2. Set the canonical HTTPS `APP_ORIGIN`, `PUBLIC_DEMO` and the verified ingress/access/allocation settings described in [configuration](docs/configuration.md). ShipTiffin supplies `REDIS_URL`, `VALKEY_PREFIX` and `DATABASE_URL`. Mixtape stores durable records in Valkey; Postgres is unused. Database configuration without Valkey fails closed instead of losing data in memory.
-3. Install the reviewed live starters into the project’s Valkey using `bun run install:live`, with its documented operator environment. Keep private manifests and development caches out of the repository and deploy source.
-4. From a configured ShipTiffin checkout, the operator runs `tiffin deploy`, then verifies generation, sharing and recipient replacement on the public URL.
+Set four values on the intended box, then deploy from this checkout. The shell variables below are privately supplied values, never committed:
+
+```sh
+tiffin secrets set mixtape QLOO_API_KEY --value "$QLOO_API_KEY"
+tiffin secrets set mixtape ANTHROPIC_API_KEY --value "$ANTHROPIC_API_KEY"
+tiffin secrets set mixtape SESSION_SECRET --value "$SESSION_SECRET"
+tiffin secrets set mixtape APP_ORIGIN --value "$APP_ORIGIN"
+tiffin deploy
+```
+
+Use a stable random session secret of at least 32 characters and the canonical HTTPS origin without a trailing slash. No separate share secret is needed.
+
+The release hook initializes missing quota records and automatically installs three curated live samples and five saved comparisons using Qloo and Haiku. It skips completed work, preserves live counters, and caps warming at 30 Qloo attempts and $0.10 of bounded model cost per release. If warming fails, the app still serves and reports unavailable samples.
+
+Defaults: public mode and edge IP trust on Tiffin; 150 Qloo attempts/day, 2,500 per project allowance, one total-counter reset on November 18, 2026 UTC, Qloo access through November 30, and model caps of $3/day and $25 total. ShipTiffin supplies the storage URLs. No manual seed step or private files are needed. See [configuration](docs/configuration.md) for exact dates, optional limits and release behavior.
 
 Gift links and drafts expire after 30 days. Valkey uses non-expiring keys with logical expiry for durable records, and expiring cache keys. Back up the project and retain its session secret.
 

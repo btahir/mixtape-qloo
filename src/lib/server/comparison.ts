@@ -1,4 +1,5 @@
 import "server-only";
+import { chargeReleaseModel } from "./release-budget";
 import { catalogContext } from "../agent/context";
 import { z } from "zod";
 import { ToolLoopAgent, tool, Output, wrapLanguageModel, isStepCount } from "ai";
@@ -114,6 +115,7 @@ export async function evaluateCase(
   draft: Draft,
   owner: string,
   ip: string,
+  options: { resumeInterrupted?: boolean } = {},
 ): Promise<Comparison> {
   if (
     !comparisonCases.some((c) => c.id === id) ||
@@ -143,13 +145,18 @@ export async function evaluateCase(
     reservationUsd: 0.02,
     maxRetries: 0,
   };
-  const version = hash(JSON.stringify({ input: frozen.inputHash, config, selectionInstructions, policy: "bounded-selection-r5", baselinePolicy: "catalog-model-v1" }));
+  const version = hash(JSON.stringify({ input: frozen.inputHash, config, selectionInstructions, policy: "bounded-selection-r5", baselinePolicy: "catalog-model-v2-validate-first" }));
   const completed = await read(`comparison:${id}:${version}`, comparisonSchema);
-  if (completed) return completed;
+  if (completed) {
+    if (options.resumeInterrupted) await update(`comparison-current:${id}`, z.string(), () => version, MONTH);
+    return completed;
+  }
   const runRecord = { id, fingerprint: inputFingerprint(draft), startedAt: new Date().toISOString() };
-  // Create-only admission prevents simultaneous/repeated evaluation spending.
-  // An interrupted record is retained for private inspection, never rerun silently.
-  await put(`evaluation-run:${id}:${version}`, evaluationRunSchema, runRecord, MONTH);
+  // The release lock permits recovery of a missing arm after interruption.
+  // Other callers retain create-only admission; saved arms never run again.
+  const checkpoint = options.resumeInterrupted ? await read(`evaluation-run:${id}:${version}`, evaluationRunSchema) : null;
+  if (checkpoint && checkpoint.fingerprint !== runRecord.fingerprint) throw new AppError(409, "Evaluation input changed.");
+  if (!checkpoint) await put(`evaluation-run:${id}:${version}`, evaluationRunSchema, runRecord, MONTH);
   async function runArm(withQloo: boolean) {
     try {
       validateCoverage(draft);
@@ -220,6 +227,7 @@ export async function evaluateCase(
               audit.inputBounds.push(bound);
               if (audit.inputBounds.length > 4 || bound > 8000)
                 throw new AppError(400, "The trusted context is too large.");
+              chargeReleaseModel(modelId(), bound);
               return params;
             },
           },
@@ -233,7 +241,10 @@ export async function evaluateCase(
             try { validated = validateBaseline(draft, choices); return { valid: true }; }
             catch { validated = []; return { valid: false, reason: "Choose exactly one eligible favourite for each requested category, preserving locks and order." }; }
           } }) },
-          prepareStep: () => ({ messages: [{ role: "user" as const, content: JSON.stringify({ ...context, validated }) }] }),
+          prepareStep: () => ({
+            messages: [{ role: "user" as const, content: JSON.stringify({ ...context, validated }) }],
+            toolChoice: validated.length ? "none" as const : "required" as const,
+          }),
           output: Output.object({
             schema: z.object({ choices: z.array(choice).max(3) }).strict(),
           }),
@@ -264,9 +275,9 @@ export async function evaluateCase(
       createdAt: new Date().toISOString(),
     };
   }
-  const withQloo = await runArm(true);
+  const withQloo = checkpoint?.withQloo ?? await runArm(true);
   await update(`evaluation-run:${id}:${version}`, evaluationRunSchema, (record) => ({ ...(record ?? runRecord), withQloo }), MONTH);
-  const withoutQloo = await runArm(false);
+  const withoutQloo = checkpoint?.withoutQloo ?? await runArm(false);
   await update(`evaluation-run:${id}:${version}`, evaluationRunSchema, (record) => ({ ...(record ?? runRecord), withQloo, withoutQloo }), MONTH);
   const record = comparisonSchema.parse({
     id,

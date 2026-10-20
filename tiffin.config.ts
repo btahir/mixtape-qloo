@@ -2,5 +2,5 @@ import { defineConfig } from "@shiptiffin/sdk";
 
 export default defineConfig({
   project: "mixtape",
-  apps: { web: { framework: "next", path: "." } },
+  apps: { web: { framework: "next", path: ".", release: "bun run release" } },
 });

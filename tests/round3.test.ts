@@ -103,4 +103,14 @@ it("comparison keeps both failed coverage arms and returns the existing record b
   vi.stubEnv("ANTHROPIC_API_KEY", "");
   expect(await evaluateCase("quiet-evenings", d, "owner", "ip")).toEqual(result);
   expect(await memory.get(ledgerKey)).toBeNull();
+  // Simulate a release interrupted after checkpointing both arms but before publish.
+  await memory.del(`comparison:quiet-evenings:${result.version}`);
+  await memory.del("comparison-current:quiet-evenings");
+  const resumed = await evaluateCase("quiet-evenings", d, "owner", "ip", { resumeInterrupted: true });
+  expect(resumed.withQloo).toEqual(result.withQloo);
+  expect(resumed.withoutQloo).toEqual(result.withoutQloo);
+  expect(await memory.get(ledgerKey)).toBeNull();
+  await memory.del("comparison-current:quiet-evenings");
+  await evaluateCase("quiet-evenings", d, "owner", "ip", { resumeInterrupted: true });
+  expect(JSON.parse((await memory.get("comparison-current:quiet-evenings"))!)).toBe(result.version);
 });

@@ -1,3 +1,5 @@
+import { liveSample } from "@/lib/server/sample-manifest";
+import { withRequestDeadline } from "@/lib/server/store";
 import { Parcel } from "@/components/print";
 import { connection } from "next/server";
 import { headers } from "next/headers";
@@ -27,6 +29,14 @@ async function Recent() {
     </section>
   ) : null;
 }
+async function SampleAvailability() {
+  await connection();
+  if (!process.env.QLOO_API_KEY || process.env.QLOO_MODE === "fixture") return null;
+  try {
+    if (await withRequestDeadline(3000, () => liveSample("quiet-evenings", "availability"))) return null;
+  } catch { /* A missing warm-up must not turn the landing page into a 5xx. */ }
+  return <p role="status">Live samples are currently unavailable. You can still start with your own favourites.</p>;
+}
 export default function Home() {
   return (
     <>
@@ -40,6 +50,7 @@ export default function Home() {
             Add your favourites and a few of theirs. Mixtape chooses a film, a
             book and an artist from your shelf.
           </p>
+          <Suspense fallback={null}><SampleAvailability /></Suspense>
           <div className="hero-actions">
             <Start sampleId="quiet-evenings" openGift label="Open a sample gift" />
             <Start />

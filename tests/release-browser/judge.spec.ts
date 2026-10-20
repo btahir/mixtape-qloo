@@ -90,3 +90,20 @@ for (const width of [1440, 390]) {
     }
   });
 }
+
+test("all five saved comparisons are readable without new generation", async ({ browser }) => {
+  const context = await browser.newContext({ extraHTTPHeaders: { "x-forwarded-for": "192.0.2.45" } });
+  try {
+    const page = await context.newPage();
+    for (const id of ["quiet-evenings", "a-little-more-soul", "stranger-worlds", "quiet-evenings-other-tastes", "known-low-coverage"]) {
+      await page.goto(`${origin}/compare/${id}`);
+      await expect(page.getByRole("heading", { name: "What changed with Qloo?", exact: true })).toBeVisible();
+      await expect(page.getByText("This comparison has not been run yet.")).toHaveCount(0);
+      await expect(page.locator(".comparison-pair")).toHaveCount(3);
+      await page.getByText("Technical details", { exact: true }).click();
+      await expect(page.locator(".comparison-technical")).toContainText("claude-haiku-5-5");
+      await expect(page.locator(".comparison-technical")).toContainText("Source: live");
+      if (id !== "known-low-coverage") await expect(page.getByText("Selection incomplete", { exact: true })).toHaveCount(0);
+    }
+  } finally { await context.close(); }
+});

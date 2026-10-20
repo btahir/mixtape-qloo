@@ -154,10 +154,10 @@ it("reviewed sample cache is reused across owners without development caching; e
   b.tastes[0].id = crypto.randomUUID().toUpperCase(); expect(await selectionCacheScope(b)).toMatch(/^B:/);
   a.excluded.push(a.shelf[0].entity.id); expect(await selectionCacheScope(a)).toMatch(/^A:/);
 });
-it("public Qloo access fails closed without an explicit bounded sibling allocation", async () => {
+it("public Qloo access defaults to a bounded demo allocation and rejects invalid overrides", async () => {
   const { ensureQlooAccess, qlooAttempt } = await import("@/lib/server/limits");
   vi.stubEnv("PUBLIC_DEMO", "true"); vi.stubEnv("QLOO_EVENT_ACCESS_CONFIRMED", "true"); vi.stubEnv("QLOO_ACCESS_EXPIRES_AT", "2099-01-01");
-  expect(() => ensureQlooAccess()).toThrow("New choices are unavailable");
+  expect(() => ensureQlooAccess()).not.toThrow();
   vi.stubEnv("QLOO_ALLOCATION_CONFIRMED", "true"); vi.stubEnv("QLOO_DAILY_ATTEMPTS", "2"); vi.stubEnv("QLOO_TOTAL_ATTEMPTS", "2");
   const attempts = await Promise.allSettled([qlooAttempt(memory), qlooAttempt(memory), qlooAttempt(memory)]);
   expect(attempts.filter((r) => r.status === "fulfilled")).toHaveLength(2);

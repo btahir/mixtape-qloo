@@ -77,7 +77,7 @@ export class MemoryStore implements Store {
 // Durable records have logical expiry inside a non-expiring KV value, so the
 // box cannot evict a gift to make room for cache entries. Expired values are
 // treated as absent by the same atomic script as the subsequent write.
-export const durableKey = (key: string) => /^(ledger|reservation|run|run-key|limit|draft|index|profile|share|token|receipt|receipt-index|live-sample|comparison|comparison-current|evaluation):/.test(key);
+export const durableKey = (key: string) => /^(allowance|release|comparison-input|evaluation-run|ledger|reservation|run|run-key|limit|draft|index|profile|share|token|receipt|receipt-index|live-sample|comparison|comparison-current|evaluation):/.test(key);
 const logicalValue = `local function value(k) local raw=redis.call('GET',k); if not raw then return false end; local e=cjson.decode(raw); local t=redis.call('TIME'); if e.expires<=t[1]*1000+math.floor(t[2]/1000) then return false end; return e.value end; `;
 // The final keys hold expiry, ledger presence and atomic durable-size accounting.
 const releaseSize = `local function release(k,sizes) local n=tonumber(redis.call('HGET',sizes,k) or '0'); if n>0 then redis.call('HINCRBY',sizes,'__total__',-n); redis.call('HDEL',sizes,k) end end; `;

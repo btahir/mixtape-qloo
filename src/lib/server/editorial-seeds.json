@@ -1,0 +1,200 @@
+{
+  "a-little-more-soul": {
+    "shelf": [
+      {
+        "id": "32ABDA4A-132B-443A-99EE-97E3C3F4B597",
+        "kind": "movie",
+        "name": "The Apartment"
+      },
+      {
+        "id": "4BF6B94B-B7D3-4815-9EFE-16A33697B38C",
+        "kind": "movie",
+        "name": "Sing Street"
+      },
+      {
+        "id": "C2E6299D-C4CE-4BFA-8EA2-57CC266FE0F4",
+        "kind": "movie",
+        "name": "Hunt for the Wilderpeople"
+      },
+      {
+        "id": "2D2CE64C-10FB-422F-B543-071802C44BEC",
+        "kind": "book",
+        "name": "High Fidelity"
+      },
+      {
+        "id": "8D233C99-DD7B-4830-A04F-513A8DD72908",
+        "kind": "book",
+        "name": "A Man Called Ove"
+      },
+      {
+        "id": "A4EE8BA6-00C8-492F-AD74-1DBD85DC91F7",
+        "kind": "book",
+        "name": "The Hitchhiker\u2019s Guide to the Galaxy (Hitchhiker's Guide to the Galaxy, #1)"
+      },
+      {
+        "id": "358721A5-84E3-4745-B24B-80BB5FE2EB9D",
+        "kind": "artist",
+        "name": "Bill Withers"
+      },
+      {
+        "id": "5474D63B-EDFC-4350-8FB5-C8D80C0D4A62",
+        "kind": "artist",
+        "name": "Lianne La Havas"
+      },
+      {
+        "id": "71A99A83-C424-408C-9C40-EDB5D2FC88E1",
+        "kind": "artist",
+        "name": "Curtis Mayfield"
+      }
+    ],
+    "tastes": [
+      {
+        "id": "286A7CF7-F90D-42D7-ACE6-5521B2CFBCAB",
+        "kind": "movie",
+        "name": "When Harry Met Sally..."
+      },
+      {
+        "id": "EF9FE530-A3E4-44EB-B593-CD150B81D36E",
+        "kind": "book",
+        "name": "The Little Prince"
+      },
+      {
+        "id": "E51DB8F2-7A93-4746-A283-E55B5216FDE1",
+        "kind": "artist",
+        "name": "Bon Iver"
+      }
+    ]
+  },
+  "quiet-evenings": {
+    "shelf": [
+      {
+        "id": "EDA54D37-08C7-457D-83F8-1BCE21FEDC63",
+        "kind": "movie",
+        "name": "Before Sunrise"
+      },
+      {
+        "id": "D68596E5-F60B-4044-8F91-6FF57EA9A25C",
+        "kind": "movie",
+        "name": "Paris, Texas"
+      },
+      {
+        "id": "B7A0731F-EC92-496A-9C40-47D9770489B6",
+        "kind": "movie",
+        "name": "Am\u00e9lie"
+      },
+      {
+        "id": "1FEAADCD-E6C3-456D-8FFA-7C1DFF5A4189",
+        "kind": "book",
+        "name": "Invisible Cities"
+      },
+      {
+        "id": "5716873A-2BC5-42C2-ADE1-2C6700F1D4D2",
+        "kind": "book",
+        "name": "Kitchen"
+      },
+      {
+        "id": "4A176261-3FB2-4479-BA7D-A34DEC79AECA",
+        "kind": "book",
+        "name": "The Ocean at the End of the Lane"
+      },
+      {
+        "id": "E11125AF-936B-4935-B607-F2DA2E6A6B92",
+        "kind": "artist",
+        "name": "Nujabes"
+      },
+      {
+        "id": "BAF6317A-DF94-4C90-92AE-63F86560C21B",
+        "kind": "artist",
+        "name": "Khruangbin"
+      },
+      {
+        "id": "5DE0ACFB-A7A9-4CE3-B83E-4B1F41D48D55",
+        "kind": "artist",
+        "name": "BADBADNOTGOOD"
+      }
+    ],
+    "tastes": [
+      {
+        "id": "9B33A620-68CA-49B3-BFCF-F09CCF8AD595",
+        "kind": "movie",
+        "name": "Spirited Away"
+      },
+      {
+        "id": "EF9FE530-A3E4-44EB-B593-CD150B81D36E",
+        "kind": "book",
+        "name": "The Little Prince"
+      },
+      {
+        "id": "E51DB8F2-7A93-4746-A283-E55B5216FDE1",
+        "kind": "artist",
+        "name": "Bon Iver"
+      }
+    ]
+  },
+  "stranger-worlds": {
+    "shelf": [
+      {
+        "id": "6BBB34F4-9345-4459-82AE-10991FA35CD2",
+        "kind": "movie",
+        "name": "Moon"
+      },
+      {
+        "id": "086E2298-1734-4043-A1C9-0E18121B384C",
+        "kind": "movie",
+        "name": "Eternal Sunshine of the Spotless Mind"
+      },
+      {
+        "id": "878B26C8-9C94-4A6B-B65A-5AAD2CC67D97",
+        "kind": "movie",
+        "name": "Pan's Labyrinth"
+      },
+      {
+        "id": "D5271D32-4043-4104-ACC2-8FE0EF32D3FB",
+        "kind": "book",
+        "name": "The Left Hand of Darkness"
+      },
+      {
+        "id": "A3CD8670-269A-4790-AABA-5C0582678F48",
+        "kind": "book",
+        "name": "Annihilation (Southern Reach, #1)"
+      },
+      {
+        "id": "436EB434-2437-4A36-97E2-17A062D6C48D",
+        "kind": "book",
+        "name": "The Wind-Up Bird Chronicle"
+      },
+      {
+        "id": "045707A1-C8EF-443F-A882-1B97AC69DC9A",
+        "kind": "artist",
+        "name": "Portishead"
+      },
+      {
+        "id": "E57B2F09-8078-4EDE-BEC0-4B02794A8D9E",
+        "kind": "artist",
+        "name": "Massive Attack"
+      },
+      {
+        "id": "6F2C4E85-CE79-4645-BAB3-3DF7EB4F4AC1",
+        "kind": "artist",
+        "name": "Sigur R\u00f3s"
+      }
+    ],
+    "tastes": [
+      {
+        "id": "C7EC4CA9-1CCC-4991-B738-55F075441B3F",
+        "kind": "movie",
+        "name": "Arrival"
+      },
+      {
+        "id": "55908017-4CFD-4688-9A7E-7B1FF04B171D",
+        "kind": "book",
+        "name": "Piranesi"
+      },
+      {
+        "id": "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C",
+        "kind": "artist",
+        "name": "Radiohead"
+      }
+    ]
+  }
+}

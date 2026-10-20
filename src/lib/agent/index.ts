@@ -1,5 +1,6 @@
 import { readingFact } from "../readings";
 import "server-only";
+import { chargeReleaseModel } from "../server/release-budget";
 import { ToolLoopAgent, isStepCount, wrapLanguageModel, asSchema } from "ai";
 import { createAnthropic } from "@ai-sdk/anthropic";
 import type { SelectionTools } from "./tools";
@@ -134,6 +135,7 @@ export async function runSelection(t: SelectionTools) {
         t.audit.inputBounds.push(bound);
         if (bound > 8000)
           throw new AppError(400, "The trusted context is too large.");
+        chargeReleaseModel(modelId(), bound);
         return params;
       },
     },

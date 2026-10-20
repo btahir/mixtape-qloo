@@ -7,7 +7,7 @@ import {
 } from "node:crypto";
 import { cookies } from "next/headers";
 import { AppError } from "./errors";
-import { hosted, verifyDeployment } from "./deployment";
+import { hosted, verifyDeployment, trustProxyIp } from "./deployment";
 import { isIP } from "node:net";
 const shared = globalThis as typeof globalThis & { mixtapeSecret?: string };
 const localSecret =
@@ -65,14 +65,12 @@ export function checkOrigin(req: Request) {
 }
 export function ipKey(req: Request) {
   verifyDeployment();
-  const forwarded = req.headers.get("x-forwarded-for")?.trim();
-  // The verified ingress must overwrite, never append to, this header.
+  // Tiffin's XFF_DEPTH=1 contract: the final hop is supplied by the edge.
+  // Never trust an earlier address supplied by the visitor.
+  const forwarded = req.headers.get("x-forwarded-for")?.split(",").at(-1)?.trim();
   if (hosted() && (!forwarded || !isIP(forwarded)))
     throw new AppError(503, "This public demo is not configured yet. Saved views remain readable.");
-  const ip =
-    process.env.TRUST_PROXY_IP === "true"
-      ? (req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown")
-      : "local";
+  const ip = trustProxyIp() ? (forwarded && isIP(forwarded) ? forwarded : "unknown") : "local";
   return hash(`${sign(new Date().toISOString().slice(0, 10))}:${ip}`);
 }
 export async function body(req: Request): Promise<unknown> {

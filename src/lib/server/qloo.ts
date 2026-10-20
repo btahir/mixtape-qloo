@@ -1,4 +1,5 @@
 import "server-only";
+import { chargeReleaseQloo } from "./release-budget";
 import { QlooClient, QLOO_ORIGIN, type QlooFlight } from "../qloo/client";
 import { QlooError } from "../qloo/errors";
 import { MemoryCache, RedisCache } from "../qloo/cache";
@@ -80,6 +81,7 @@ export function client(scope: string, onAttempt?: () => Promise<void>) {
           await qlooAttempt();
           init?.signal?.throwIfAborted();
           if (devDirectory) await recordDevelopmentAttempt(devDirectory, String(input));
+          chargeReleaseQloo();
           const response = await fetch(input, init);
           let shortThrottle = false;
           // Qloo's observed second-limit responses omit Retry-After. A known

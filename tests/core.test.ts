@@ -148,7 +148,8 @@ describe("atomic persistence and budgets", () => {
     ]);
     expect(a.filter((v) => v.status === "fulfilled")).toHaveLength(1);
   });
-  it("fails closed on unconfirmed event access and counts dispatch attempts", async () => {
+  it("honors explicit access denial and counts dispatch attempts", async () => {
+    vi.stubEnv("QLOO_EVENT_ACCESS_CONFIRMED", "false");
     await expect(qlooAttempt()).rejects.toMatchObject({ status: 503 });
     vi.stubEnv("QLOO_EVENT_ACCESS_CONFIRMED", "true");
     vi.stubEnv("QLOO_ACCESS_EXPIRES_AT", "2099-01-01T00:00:00Z");

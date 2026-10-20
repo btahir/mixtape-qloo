@@ -21,7 +21,7 @@ export default defineConfig({
       TIFFIN_PROJECT: "",
       QLOO_MODE: "live",
       QLOO_DEV_CACHE_DIR: "",
-      // Reviewed manifests must already be installed in the test Valkey.
+      // bun run release must already have installed the test Valkey records.
       QLOO_SAMPLE_DIR: ".qa/no-file-fallback",
       MIXTAPE_AGENT_MODE: "anthropic",
       REQUIRE_REDIS: "true",

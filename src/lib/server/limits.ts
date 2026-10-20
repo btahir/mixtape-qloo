@@ -1,7 +1,6 @@
 import "server-only";
 import { z } from "zod";
 import { DAY, update, store, type Store } from "./store";
-import { hosted } from "./deployment";
 import { AppError } from "./errors";
 import { sleep } from "../qloo/client";
 const countSchema = z.object({ count: z.number(), reset: z.number() });
@@ -78,6 +77,7 @@ const ledgerSchema = z.object({
   total: z.number(),
   qlooDaily: z.number(),
   qlooTotal: z.number(),
+  qlooResetApplied: z.string().optional(),
   reservations: z.record(
     z.string(),
     z.object({ amount: z.number(), settled: z.boolean(), until: z.number().optional() }),
@@ -247,36 +247,50 @@ export async function release(id: string, s: Store = store()) {
     s,
   );
 }
+export const quotaSchema = z.object({
+  daily: z.number().int().min(0).max(250), total: z.number().int().min(0).max(2500),
+  resetAt: z.string().datetime(), accessExpiresAt: z.string().datetime(),
+});
+export function quotaDefaults() {
+  return quotaSchema.parse({
+    daily: Number(process.env.QLOO_DAILY_ATTEMPTS?.trim() || 150),
+    total: Number(process.env.QLOO_TOTAL_ATTEMPTS?.trim() || 2500),
+    resetAt: process.env.QLOO_QUOTA_RESET_AT?.trim() || "2026-11-18T00:00:00Z",
+    accessExpiresAt: new Date(process.env.QLOO_ACCESS_EXPIRES_AT?.trim() || "2026-11-30T23:59:59Z").toISOString(),
+  });
+}
+/** Create-only: a deploy must never replenish usage or replace an allocation. */
+export async function provisionAllowance(s: Store = store()) {
+  await s.cas("allowance:v1", null, JSON.stringify(quotaDefaults()), 365 * DAY);
+  await s.cas(ledgerKey, null, JSON.stringify(initial()), 365 * DAY);
+}
 export function ensureQlooAccess() {
-  // Each sibling must have a non-overlapping allocation and <=2 starts/second.
-  // Credential presence alone is never proof that the shared allowance is safe.
-  if (hosted() && (process.env.QLOO_ALLOCATION_CONFIRMED !== "true" ||
-    !Number.isInteger(Number(process.env.QLOO_TOTAL_ATTEMPTS)) || Number(process.env.QLOO_TOTAL_ATTEMPTS) <= 0 || Number(process.env.QLOO_TOTAL_ATTEMPTS) > 2500 ||
-    !Number.isInteger(Number(process.env.QLOO_DAILY_ATTEMPTS)) || Number(process.env.QLOO_DAILY_ATTEMPTS) <= 0 || Number(process.env.QLOO_DAILY_ATTEMPTS) > 250))
-    throw new AppError(503, "New choices are unavailable right now. You can still open saved mixtapes.");
-  const expiry = Date.parse(process.env.QLOO_ACCESS_EXPIRES_AT ?? "");
-  if (
-    process.env.QLOO_EVENT_ACCESS_CONFIRMED !== "true" ||
-    !Number.isFinite(expiry) ||
-    expiry <= Date.now()
-  )
+  let expiry = 0;
+  try { expiry = Date.parse(quotaDefaults().accessExpiresAt); }
+  catch { throw new AppError(503, "New choices are unavailable right now. You can still open saved mixtapes."); }
+  if (process.env.QLOO_EVENT_ACCESS_CONFIRMED === "false" ||
+      process.env.QLOO_ALLOCATION_CONFIRMED === "false" || expiry <= Date.now())
     throw new AppError(503, "We cannot reach Qloo with this setup.");
 }
 export async function qlooAttempt(s: Store = store()) {
   ensureQlooAccess();
+  const defaults = quotaDefaults();
+  const raw = await s.get("allowance:v1");
+  const allowance = raw ? quotaSchema.parse(JSON.parse(raw)) : defaults;
+  if (Date.parse(allowance.accessExpiresAt) <= Date.now()) throw new AppError(503, "We cannot reach Qloo with this setup.");
   await update(
     ledgerKey,
     ledgerSchema,
     (old) => {
       const l = refresh(old, Date.now());
-      if (
-        l.qlooDaily >= cap("QLOO_DAILY_ATTEMPTS", hosted() ? 250 : 150) ||
-        l.qlooTotal >= cap("QLOO_TOTAL_ATTEMPTS", hosted() ? 2500 : 150)
-      )
-        throw new AppError(
-          503,
-          "New choices are unavailable right now. You can still open saved mixtapes.",
-        );
+      // One scheduled total-allowance reset, applied on use, never by a deploy.
+      if (Date.parse(allowance.resetAt) <= Date.now() && l.qlooResetApplied !== allowance.resetAt) {
+        l.qlooTotal = 0;
+        l.qlooResetApplied = allowance.resetAt;
+      }
+      if (l.qlooDaily >= Math.min(defaults.daily, allowance.daily) ||
+          l.qlooTotal >= Math.min(defaults.total, allowance.total))
+        throw new AppError(503, "New choices are unavailable right now. You can still open saved mixtapes.");
       l.qlooDaily++;
       l.qlooTotal++;
       return l;
