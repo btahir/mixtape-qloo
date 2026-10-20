@@ -1,23 +1,55 @@
 # Mixtape
 
-Send a friend a film, a book and an artist you love, chosen from your favourites to meet their tastes.
+Send a friend a film, a book and an artist you love, picked from your favourites to match their tastes.
 
-![Mixtape: a cultural care package for one person](docs/hero.webp)
+### [Try it live → mixtape.shiptiffin.app](https://mixtape.shiptiffin.app)
 
-Add your favourites and a few of theirs. Open the gift, add your own notes and share a link. The recipient can save a piece, replace one they already know, inspect **Why this?**, or make one back. No account required.
+Built for the [Qloo Agentic Hackathon 2026](https://qloo.devpost.com/). No account needed. Open the sample gift on the homepage to see the whole exchange in under a minute.
 
-## How it chooses
+![The Mixtape homepage: send a friend three things you love](docs/hero.webp)
 
-**Qloo** resolves cultural identities and ranks only the sender’s approved favourites against the recipient’s declared tastes. Its cross-category connections, ranks and provenance remain inspectable. **Claude Haiku**, through the AI SDK’s tool loop and Anthropic API, chooses tools, reads those results, retries eligible subsets and commits a validated selection or asks for input. It cannot invent shelf items or override Qloo’s ranking. Personal names and notes stay out of the model context.
+## How it works
 
-Runs have bounded calls, time and spend; the default model is `claude-haiku-5-5`, with a $3 daily cap. An explicit deterministic outage mode is labelled in the UI. Offline samples use synthetic data and never call either provider.
+1. **Fill your shelf.** Add at least two films, two books and two artists you love, then three or more things your friend likes.
+2. **Mixtape picks one of each.** Qloo ranks your favourites against your friend's tastes. The agent checks the result and commits the strongest film, book and artist. You write a short note for each.
+3. **They open it, and can send one back.** Your friend gets a link to a small parcel that opens into three pieces. If they already know one, they ask for another and only that piece changes. "Make one back" starts their reply with your three pieces as the tastes to match.
 
-![An opened gift with three personal recommendations](docs/gift.webp)
-![Inspecting the Qloo evidence for a replacement](docs/evidence.webp)
+![An opened gift: Amélie, Invisible Cities and Khruangbin, each with a note from Maya](docs/gift.webp)
+
+## Qloo and the agent
+
+```mermaid
+flowchart LR
+  A[Sender's shelf<br/>and friend's tastes] --> H[Claude Haiku agent]
+  H -- rankNeededSlots --> Q[(Qloo Insights API)]
+  Q -- ranks, affinities,<br/>explainability --> H
+  H -- commitDraft or<br/>requestInput --> M[Mixtape app]
+  M -- already know this:<br/>exclude one piece --> H
+```
+
+**Qloo does the taste work.** It resolves each title to a Qloo entity, then ranks only the sender's confirmed favourites (`filter.results.entities`) against the friend's tastes (`signal.interests.entities`), with explainability turned on. Every pick keeps its rank, affinity score and the reported connection to one of the friend's tastes. "Why this?" shows that evidence.
+
+**The agent does the deciding.** Claude Haiku runs a bounded tool loop through the AI SDK. It chooses when to rank, reads the results, retries a slot only when the inputs changed, and then either commits a validated pick or stops to ask for more favourites. It cannot add items that are not on the shelf, reorder Qloo's ranking, or write the sender's notes. Names and notes never reach the model.
+
+When the recipient marks a piece as known, the same loop runs again for that one slot, with the shown pieces excluded. The other two pieces stay as they were.
+
+![After "Already know this": a new book from the same shelf, and the return gift](docs/receive.webp)
+
+Each run has caps on tool calls, time and spend (default model `claude-haiku-5-5`, $3 a day). If the model is unavailable, a clearly labelled outage mode picks with Qloo alone. Offline sample mode uses illustrative data and calls neither service.
+
+![The evidence behind a pick](docs/evidence.webp)
+
+## Tech stack
+
+- Next.js 16 (App Router, Cache Components) on Bun
+- Qloo Insights and Search APIs
+- Claude Haiku through the AI SDK and `@ai-sdk/anthropic`
+- Valkey for drafts, links and caches (in memory when run locally)
+- Playwright and Vitest for tests
 
 ## Run locally
 
-Use Bun 1.4.2 or later (Node.js 24 is also supported for npm tooling).
+You need Bun 1.4.2 or later.
 
 ```sh
 bun install --frozen-lockfile
@@ -25,44 +57,33 @@ cp .env.example .env.local
 bun --bun next dev
 ```
 
-Open http://localhost:3000. Leave optional entries empty; leave runtime-managed `NODE_ENV` and `PORT` unset. With no credentials, sample mode works offline. Without Valkey, local drafts and links live in memory and disappear on restart.
-
-For live generation, set `QLOO_API_KEY` and `ANTHROPIC_API_KEY`. To install the live starters and comparisons, connect an isolated local Valkey and run `bun run release`; see [configuration](docs/configuration.md). Every supported variable is listed, without values, in [.env.example](.env.example).
+Open http://localhost:3000. With no keys, the app runs in offline sample mode. To make real picks, set `QLOO_API_KEY` and `ANTHROPIC_API_KEY` in `.env.local`. Without Valkey, drafts and links live in memory until you restart. [docs/configuration.md](docs/configuration.md) covers the optional settings and how to install the live samples.
 
 ```sh
 bun run typecheck
 bun run lint
-bun run test
-bun --bun next build
-bun --bun next start
+bun run test        # storage tests need redis-server on PATH
+bun run test:e2e    # offline browser suite against a production build
 ```
 
-Storage tests require `redis-server` on PATH and start isolated local instances.
-
-`bun run test:e2e` runs the offline browser suite against a production build using the pinned Playwright Chromium headless shell. `bun run test:e2e:live` is opt-in and uses paid providers and private manifests.
+`bun scripts/social-preview.tsx` redraws the social preview and app icons.
 
 ## Deploy on ShipTiffin
 
-[tiffin.config.ts](tiffin.config.ts) declares project `mixtape` and one Next.js `web` app at `.`. ShipTiffin builds and starts it on Bun and supplies the Next.js adapter and project services. No custom service options or database migrations are needed.
+[tiffin.config.ts](tiffin.config.ts) declares the `mixtape` project with one Next.js app. ShipTiffin builds it, runs it on Bun and provides Valkey. Set four secrets on the box, then deploy:
 
-Set four values on the intended box, then deploy from this checkout. The shell variables below are privately supplied values, never committed:
+- `QLOO_API_KEY`
+- `ANTHROPIC_API_KEY`
+- `SESSION_SECRET` (a stable random string of at least 32 characters)
+- `APP_ORIGIN` (the public HTTPS origin, no trailing slash)
 
 ```sh
-tiffin secrets set mixtape QLOO_API_KEY --value "$QLOO_API_KEY"
-tiffin secrets set mixtape ANTHROPIC_API_KEY --value "$ANTHROPIC_API_KEY"
-tiffin secrets set mixtape SESSION_SECRET --value "$SESSION_SECRET"
-tiffin secrets set mixtape APP_ORIGIN --value "$APP_ORIGIN"
+tiffin secrets set mixtape QLOO_API_KEY --value "$QLOO_API_KEY"   # and the other three
 tiffin deploy
 ```
 
-Use a stable random session secret of at least 32 characters and the canonical HTTPS origin without a trailing slash. No separate share secret is needed.
-
-The release hook initializes missing quota records and automatically installs three curated live samples and five saved comparisons using Qloo and Haiku. It skips completed work, preserves live counters, and caps warming at 30 Qloo attempts and $0.10 of bounded model cost per release. If warming fails, the app still serves and reports unavailable samples.
-
-Defaults: public mode and edge IP trust on Tiffin; 150 Qloo attempts/day, 2,500 per project allowance, one total-counter reset on November 18, 2026 UTC, Qloo access through November 30, and model caps of $3/day and $25 total. ShipTiffin supplies the storage URLs. No manual seed step or private files are needed. See [configuration](docs/configuration.md) for exact dates, optional limits and release behavior.
-
-Gift links and drafts expire after 30 days. Valkey uses non-expiring keys with logical expiry for durable records, and expiring cache keys. Back up the project and retain its session secret.
+The release hook warms the three live samples and the saved comparisons, capped at 30 Qloo calls and $0.10 of model spend per release. Gift links and drafts expire after 30 days. See [docs/configuration.md](docs/configuration.md) for limits and dates.
 
 ## License
 
-[MIT](LICENSE) © 2026 Bilal Tahir. Bundled fonts retain their [own licences](public/fonts/README.md); third-party catalog data and artwork are not covered by the code licence.
+[MIT](LICENSE) © 2026 Bilal Tahir. Bundled fonts keep their [own licences](public/fonts/README.md). Catalog data and artwork from third parties are not covered by the code licence.
