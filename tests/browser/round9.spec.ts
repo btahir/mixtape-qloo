@@ -1,18 +1,19 @@
 import { test, expect } from "./fixture";
 
-test("a painted starter waits for hydration, then the first accepted click creates exactly one draft", async ({ page }) => {
+test("clicks on a painted starter before hydration are kept, and create exactly one draft", async ({ page }) => {
   let release!: () => void;
   const scripts = new Promise<void>((resolve) => { release = resolve; });
   await page.route("**/_next/static/**/*.js", async (route) => { await scripts; await route.continue(); });
   let requests = 0;
   page.on("request", (request) => { if (request.url().endsWith("/api/drafts") && request.method() === "POST") requests++; });
   await page.goto("/", { waitUntil: "commit" });
-  await expect(page.locator(".hero-actions button").first()).toBeDisabled();
-  expect(requests).toBe(0);
-  release();
   const start = page.getByRole("button", { name: "Try this exchange", exact: true }).first();
   await expect(start).toBeEnabled();
   await start.click();
+  await start.click();
+  expect(await start.evaluate((button) => button.hasAttribute("data-live"))).toBe(false);
+  expect(requests).toBe(0);
+  release();
   await expect(page).toHaveURL(/\/make\//);
   expect(requests).toBe(1);
 });

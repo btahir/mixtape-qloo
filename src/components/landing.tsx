@@ -1,16 +1,14 @@
 "use client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useRef, useState, useSyncExternalStore } from "react";
+import { useRef, useState } from "react";
 import { samples } from "@/lib/samples";
 import type { Draft } from "@/lib/domain";
 import { agentRequest, api, message } from "@/lib/client";
 import dynamic from "next/dynamic";
 const Sheet = dynamic(() => import("./ui/sheet").then((m) => m.Sheet));
 import { useOnline } from "./network";
-const subscribeReady = () => () => {};
-const clientReady = () => true;
-const serverReady = () => false;
+import { useEarlyClick } from "./early-click";
 
 export function Start({
   sampleId,
@@ -24,49 +22,53 @@ export function Start({
   openGift?: boolean;
 }) {
   const router = useRouter();
-  const ready = useSyncExternalStore(subscribeReady, clientReady, serverReady);
   const starting = useRef(false);
   const [busy, setBusy] = useState(false),
     [error, setError] = useState("");
   const online = useOnline();
   const [stage, setStage] = useState("Opening…");
+  const begin = async () => {
+    if (starting.current) return;
+    starting.current = true;
+    setBusy(true);
+    try {
+      const d = await api<Draft>("/api/drafts", "POST", {
+        source: sampleId ? fixture ? "fixture" : "sample" : "empty",
+        sampleId,
+      });
+      if (openGift) {
+        setStage("Choosing the three pieces…");
+        try {
+          const run = await agentRequest({ action: "prepare", draftId: d.id, expectedVersion: d.version, idempotencyKey: crypto.randomUUID() }, (run) => {
+            try { sessionStorage.setItem(`mixtape-run:${d.id}`, run.id); } catch {}
+          }, () => {});
+          if (run.status === "ready") {
+            try { sessionStorage.removeItem(`mixtape-run:${d.id}`); } catch {}
+            router.push(`/make/${d.id}?opening=1`);
+            return;
+          }
+        } catch { /* The draft resumes or explains the failed run. */ }
+      }
+      router.push(`/make/${d.id}`);
+    } catch (e) {
+      setError(message(e));
+    } finally {
+      starting.current = false;
+      setBusy(false);
+    }
+  };
+  const button = useEarlyClick<HTMLButtonElement>(`start:${sampleId ?? "own"}:${openGift ? "open" : "edit"}:${label}`, () => void begin());
   return (
     <>
       <button
+        ref={button}
+        data-early={`start:${sampleId ?? "own"}:${openGift ? "open" : "edit"}:${label}`}
         className={sampleId ? "primary" : "secondary"}
-        disabled={!ready || busy || !online}
-        onClick={async () => {
-          if (starting.current) return;
-          starting.current = true;
-          setBusy(true);
-          try {
-            const d = await api<Draft>("/api/drafts", "POST", {
-              source: sampleId ? fixture ? "fixture" : "sample" : "empty",
-              sampleId,
-            });
-            if (openGift) {
-              setStage("Choosing the three pieces…");
-              try {
-                const run = await agentRequest({ action: "prepare", draftId: d.id, expectedVersion: d.version, idempotencyKey: crypto.randomUUID() }, (run) => {
-                  try { sessionStorage.setItem(`mixtape-run:${d.id}`, run.id); } catch {}
-                }, () => {});
-                if (run.status === "ready") {
-                  try { sessionStorage.removeItem(`mixtape-run:${d.id}`); } catch {}
-                  router.push(`/make/${d.id}?opening=1`);
-                  return;
-                }
-              } catch { /* The draft resumes or explains the failed run. */ }
-            }
-            router.push(`/make/${d.id}`);
-          } catch (e) {
-            setError(message(e));
-          } finally {
-            starting.current = false;
-            setBusy(false);
-          }
-        }}
+        disabled={busy || !online}
+        aria-busy={busy || undefined}
+        onClick={() => void begin()}
       >
-        {!ready ? "Getting ready…" : busy ? stage : label}
+        {busy ? stage : label}
       </button>
       {error && <p role="alert">{error}</p>}
     </>
@@ -76,15 +78,15 @@ export function How({ comparisonHref }: { comparisonHref?: string }) {
   const [open, setOpen] = useState(false);
   const [hasOpened, setHasOpened] = useState(false);
   const [availableComparison, setAvailableComparison] = useState(comparisonHref);
+  const show = () => {
+    setHasOpened(true);
+    setOpen(true);
+    void api<{ href?: string }>("/api/comparisons", "GET").then((value) => setAvailableComparison(value.href)).catch(() => {});
+  };
+  const button = useEarlyClick<HTMLButtonElement>("how", show);
   return (
     <>
-      <button
-        onClick={() => {
-          setHasOpened(true);
-          setOpen(true);
-          void api<{ href?: string }>("/api/comparisons", "GET").then((value) => setAvailableComparison(value.href)).catch(() => {});
-        }}
-      >
+      <button ref={button} data-early="how" onClick={show}>
         How it chooses
       </button>
       {hasOpened && (

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import { EARLY_CLICK_SCRIPT } from "@/components/early-click";
 import { How } from "@/components/landing";
 import { Network } from "@/components/network";
 import { Mark } from "@/components/print";
@@ -21,6 +22,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <head>
+        <script dangerouslySetInnerHTML={{ __html: EARLY_CLICK_SCRIPT }} />
         {[
           "bricolage-grotesque-normal-85f55a58a3",
           "dm-sans-normal-468d56b6b2",
