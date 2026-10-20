@@ -10,6 +10,13 @@ import { Start, Samples, DraftList } from "@/components/landing";
 import { listDrafts } from "@/lib/server/repository";
 import { session } from "@/lib/server/security";
 import { AppError } from "@/lib/server/errors";
+import type { Metadata } from "next";
+import { siteDescription, siteTitle } from "@/lib/site";
+export const metadata: Metadata = {
+  title: { absolute: siteTitle },
+  alternates: { canonical: "/" },
+  openGraph: { type: "website", siteName: "Mixtape", locale: "en_GB", url: "/", title: siteTitle, description: siteDescription },
+};
 async function Recent() {
   await connection();
   let drafts;

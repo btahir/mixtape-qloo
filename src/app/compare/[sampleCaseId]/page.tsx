@@ -11,6 +11,18 @@ import { readComparison } from "@/lib/server/comparison";
 import { notFound } from "next/navigation";
 import { EvidenceView } from "@/components/evidence";
 import { singular } from "@/lib/domain";
+import type { Metadata } from "next";
+export async function generateMetadata({ params }: { params: Promise<{ sampleCaseId: string }> }): Promise<Metadata> {
+  await connection();
+  const { sampleCaseId } = await params;
+  const c = comparisonCases.find((c) => c.id === sampleCaseId);
+  if (!c) return { title: "Comparison not found" };
+  return {
+    title: `${c.title}: what Qloo changed`,
+    description: "The same shelf, tastes and constraints, ranked with and without Qloo, with the evidence for each choice.",
+    alternates: { canonical: `/compare/${c.id}` },
+  };
+}
 async function Content({
   params,
 }: {

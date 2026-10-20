@@ -3,6 +3,12 @@ import { Suspense } from "react";
 import { connection } from "next/server";
 import { readComparison, type Comparison } from "@/lib/server/comparison";
 import { singular } from "@/lib/domain-view";
+import type { Metadata } from "next";
+export const metadata: Metadata = {
+  title: "Change one taste, see what follows",
+  description: "Two saved Qloo rankings of the same fictional exchange: one of Leo’s tastes changes, and the film, book or artist chosen from Maya’s shelf changes with it.",
+  alternates: { canonical: "/connections" },
+};
 
 function controlledPair(a: Comparison, b: Comparison) {
   const constraints = (record: Comparison) => JSON.stringify([record.shelfIds, record.excludedIds.filter((id) => !record.signalIds.includes(id)), record.locks, record.categories, record.model, record.configHash]);

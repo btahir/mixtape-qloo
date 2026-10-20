@@ -8,12 +8,13 @@ import { session, ipKey } from "@/lib/server/security";
 import { rate } from "@/lib/server/limits";
 import { Receiver } from "@/components/receiver";
 import { AppError } from "@/lib/server/errors";
+import { privatePage } from "@/lib/site";
 export async function generateMetadata({ params }: { params: Promise<{ token: string }> }): Promise<Metadata> {
   await connection();
   const share = await publicShare((await params).token).catch(() => null);
   const title = share ? `${share.sender || "A friend"} made ${share.recipient || "you"} a mixtape` : "Mixtape";
   const description = share ? share.revision.slots.map((s) => s.entity.name).join(" · ") + ". A few favourites, chosen for you." : "A little of a friend’s world.";
-  return { title, description, openGraph: { title, description, type: "website" }, twitter: { card: "summary_large_image", title, description } };
+  return { title: { absolute: title }, description, robots: privatePage, openGraph: { title, description, type: "website", siteName: "Mixtape" }, twitter: { card: "summary_large_image", title, description } };
 }
 async function Content({ params }: { params: Promise<{ token: string }> }) {
   await connection();

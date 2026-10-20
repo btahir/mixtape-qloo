@@ -7,6 +7,9 @@ import { DraftList } from "@/components/landing";
 import { listDrafts } from "@/lib/server/repository";
 import { session } from "@/lib/server/security";
 import { AppError } from "@/lib/server/errors";
+import type { Metadata } from "next";
+import { privatePage } from "@/lib/site";
+export const metadata: Metadata = { title: "My drafts", robots: privatePage };
 async function OwnedDrafts() {
   await connection();
   let drafts: Awaited<ReturnType<typeof listDrafts>>;

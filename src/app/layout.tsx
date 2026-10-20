@@ -1,6 +1,7 @@
 import Link from "next/link";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { EARLY_CLICK_SCRIPT } from "@/components/early-click";
+import { siteDescription, siteOrigin, siteTitle } from "@/lib/site";
 import { How } from "@/components/landing";
 import { Network } from "@/components/network";
 import { Mark } from "@/components/print";
@@ -12,12 +13,17 @@ async function SourceNotice() {
   return process.env.QLOO_MODE === "fixture" || (!process.env.QLOO_API_KEY && process.env.QLOO_MODE !== "live") ? <p className="notice">Sample mode · No live Qloo calls</p> : process.env.MIXTAPE_AGENT_MODE === "deterministic" ? <p className="notice">Outage fallback · Qloo choices without the language agent</p> : null;
 }
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.APP_ORIGIN || "http://localhost:3000"),
-  title: "Mixtape",
-  description: "Send a friend three things you love.",
-  robots: { index: false, follow: false, noarchive: true },
+  metadataBase: new URL(siteOrigin()),
+  title: { default: siteTitle, template: "%s · Mixtape" },
+  description: siteDescription,
+  applicationName: "Mixtape",
+  // Indexable by default; drafts, gift links and other private pages opt out.
+  robots: { index: true, follow: true },
+  openGraph: { type: "website", siteName: "Mixtape", locale: "en_GB", title: siteTitle, description: siteDescription },
+  twitter: { card: "summary_large_image", title: siteTitle, description: siteDescription },
   referrer: "no-referrer",
 };
+export const viewport: Viewport = { themeColor: "#f4f1e7" };
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">

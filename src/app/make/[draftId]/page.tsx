@@ -9,6 +9,9 @@ import { owned } from "@/lib/server/repository";
 import { session } from "@/lib/server/security";
 import { tasteExample } from "@/lib/server/taste-example";
 import { Composer } from "@/components/composer";
+import type { Metadata } from "next";
+import { privatePage } from "@/lib/site";
+export const metadata: Metadata = { title: "Your mixtape", robots: privatePage };
 async function Content({ params, searchParams }: { params: Promise<{ draftId: string }>; searchParams: Promise<{ opening?: string }> }) {
   await connection();
   let draft;
