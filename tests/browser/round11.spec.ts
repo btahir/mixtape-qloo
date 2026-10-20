@@ -1,0 +1,27 @@
+import { test, expect } from "./fixture";
+test("note editing holds neighbouring invitations still and owner navigation stays clickable", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "Try this exchange", exact: true }).first().click();
+  await page.getByRole("button", { name: "Make their mixtape", exact: true }).click();
+  const draftUrl = page.url();
+  const first = page.locator(".panels > li").first();
+  await first.locator(".piece-menu > summary").click();
+  const invitation = page.locator(".panels > li").nth(1).locator(".explore-piece");
+  const before = await invitation.evaluate((e) => e.getBoundingClientRect().top + scrollY);
+  await first.locator(".note-editor-trigger").click();
+  await expect(page.getByRole("dialog").locator("textarea")).toBeFocused();
+  const during = await invitation.evaluate((e) => e.getBoundingClientRect().top + scrollY);
+  expect(during).toBeCloseTo(before, 0);
+  await page.getByRole("dialog").getByRole("button", { name: "Close", exact: true }).click();
+  await page.getByRole("button", { name: "Create share link", exact: true }).first().click();
+  await page.getByRole("button", { name: "Create link", exact: true }).click();
+  const url = await page.getByLabel("Their link", { exact: true }).inputValue();
+  await page.goto(url);
+  await page.getByRole("button", { name: "Open your mixtape", exact: true }).click();
+  await expect(page.locator(".keepsake-note")).toContainText("I wanted you to have them too.");
+  await page.getByRole("link", { name: "Back to your draft", exact: true }).click();
+  await expect(page).toHaveURL(draftUrl);
+  const invalid = await page.request.get("/m/invalid-review-token/opengraph-image");
+  expect(invalid.status()).toBe(404);
+  expect((await invalid.body()).length).toBeLessThan(1000);
+});

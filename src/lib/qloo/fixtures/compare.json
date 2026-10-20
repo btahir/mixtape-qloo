@@ -1,0 +1,10 @@
+{
+  "fixture": true,
+  "fixture_notice": "SYNTHETIC FIXTURE: authored demo data, fabricated IDs and scores; never live Qloo output.",
+  "success": true,
+  "results": [],
+  "warnings": [
+    "Fixture comparison intentionally has no invented comparison metrics."
+  ],
+  "duration": 2
+}

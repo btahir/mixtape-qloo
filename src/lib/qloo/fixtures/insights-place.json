@@ -1,0 +1,67 @@
+{
+  "fixture": true,
+  "fixture_notice": "SYNTHETIC FIXTURE: authored demo data, fabricated IDs and scores; never live Qloo output.",
+  "success": true,
+  "results": {
+    "entities": [
+      {
+        "entity_id": "f0000000-0000-4000-8000-000000000009",
+        "name": "The Museum of Modern Art",
+        "type": "urn:entity",
+        "subtype": "urn:entity:place",
+        "popularity": 0.907,
+        "tags": [
+          {
+            "id": "urn:tag:genre:media:art",
+            "name": "Art",
+            "type": "urn:tag:genre:media"
+          }
+        ],
+        "properties": {
+          "address": "11 W 53rd St, New York, NY",
+          "geocode": {
+            "city": "New York",
+            "country_code": "US"
+          },
+          "description": "An art museum in Midtown Manhattan."
+        },
+        "location": {
+          "latitude": 40.7614,
+          "longitude": -73.9776
+        },
+        "query": {
+          "affinity": 0.91,
+          "affinity_rank": 1
+        }
+      },
+      {
+        "entity_id": "f0000000-0000-4000-8000-000000000010",
+        "name": "Shakespeare and Company",
+        "type": "urn:entity",
+        "subtype": "urn:entity:place",
+        "popularity": 0.9,
+        "tags": [
+          {
+            "id": "urn:tag:genre:media:books",
+            "name": "Books",
+            "type": "urn:tag:genre:media"
+          }
+        ],
+        "address": "37 Rue de la B\u00fbcherie, Paris",
+        "geocode": {
+          "city": "Paris",
+          "country_code": "FR"
+        },
+        "description": "An English-language bookshop in Paris.",
+        "location": {
+          "latitude": 48.8526,
+          "longitude": 2.3472
+        },
+        "affinity": 0.81
+      }
+    ],
+    "duration": 5
+  },
+  "query": {},
+  "duration": 5
+}

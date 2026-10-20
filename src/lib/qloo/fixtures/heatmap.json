@@ -1,0 +1,34 @@
+{
+  "fixture": true,
+  "fixture_notice": "SYNTHETIC FIXTURE: authored demo data, fabricated IDs and scores; never live Qloo output.",
+  "success": true,
+  "results": {
+    "heatmap": [
+      {
+        "location": {
+          "latitude": 40.72,
+          "longitude": -73.99,
+          "geohash": "dr5rs"
+        },
+        "query": {
+          "affinity": 0.82,
+          "affinity_rank": 0.91,
+          "popularity": 0.66
+        }
+      },
+      {
+        "location": {
+          "latitude": 40.75,
+          "longitude": -73.98,
+          "geohash": "dr5ru"
+        },
+        "query": {
+          "affinity": 0.67,
+          "affinity_rank": 0.73,
+          "popularity": 0.8
+        }
+      }
+    ]
+  },
+  "duration": 5
+}

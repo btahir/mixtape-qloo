@@ -1,0 +1,51 @@
+{
+  "fixture": true,
+  "fixture_notice": "SYNTHETIC FIXTURE: authored demo data, fabricated IDs and scores; never live Qloo output.",
+  "success": true,
+  "results": {
+    "entities": [
+      {
+        "entity_id": "f0000000-0000-4000-8000-000000000015",
+        "name": "99% Invisible",
+        "type": "urn:entity",
+        "subtype": "urn:entity:podcast",
+        "popularity": 0.865,
+        "tags": [
+          {
+            "id": "urn:tag:genre:media:design",
+            "name": "Design",
+            "type": "urn:tag:genre:media"
+          }
+        ],
+        "properties": {
+          "episode_count": "500",
+          "description": "A podcast about design and the built environment."
+        },
+        "query": {
+          "affinity": 0.91,
+          "affinity_rank": 1
+        }
+      },
+      {
+        "entity_id": "f0000000-0000-4000-8000-000000000016",
+        "name": "Radiolab",
+        "type": "urn:entity",
+        "subtype": "urn:entity:podcast",
+        "popularity": 0.858,
+        "tags": [
+          {
+            "id": "urn:tag:genre:media:science",
+            "name": "Science",
+            "type": "urn:tag:genre:media"
+          }
+        ],
+        "episode_count": "300",
+        "description": "A podcast exploring science and human experience.",
+        "affinity": 0.81
+      }
+    ],
+    "duration": 5
+  },
+  "query": {},
+  "duration": 5
+}

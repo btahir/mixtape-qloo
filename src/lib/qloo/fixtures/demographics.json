@@ -1,0 +1,27 @@
+{
+  "fixture": true,
+  "fixture_notice": "SYNTHETIC FIXTURE: authored demo data, fabricated IDs and scores; never live Qloo output.",
+  "success": true,
+  "results": {
+    "demographics": [
+      {
+        "entity_id": "f0000000-0000-4000-8000-000000000001",
+        "query": {
+          "age": {
+            "24_and_younger": -0.12,
+            "25_to_29": 0.31,
+            "30_to_34": 0.24,
+            "35_to_44": 0.08,
+            "45_to_54": -0.17,
+            "55_and_older": -0.22
+          },
+          "gender": {
+            "male": -0.03,
+            "female": 0.03
+          }
+        }
+      }
+    ]
+  },
+  "duration": 4
+}

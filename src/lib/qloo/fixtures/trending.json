@@ -1,0 +1,26 @@
+{
+  "fixture": true,
+  "fixture_notice": "SYNTHETIC FIXTURE: authored demo data, fabricated IDs and scores; never live Qloo output.",
+  "success": true,
+  "results": {
+    "trending": [
+      {
+        "date": "2026-10-09",
+        "population_percentile": 85.2,
+        "population_rank": 150,
+        "population_rank_velocity": 5,
+        "velocity_fold_change": 1.15,
+        "population_percent_delta": 1.15
+      },
+      {
+        "date": "2026-10-02",
+        "population_percentile": 83.4,
+        "population_rank": 155,
+        "population_rank_velocity": -2,
+        "velocity_fold_change": 0.98,
+        "population_percent_delta": -0.2
+      }
+    ]
+  },
+  "duration": 3
+}

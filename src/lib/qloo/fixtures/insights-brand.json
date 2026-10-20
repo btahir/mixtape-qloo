@@ -1,0 +1,49 @@
+{
+  "fixture": true,
+  "fixture_notice": "SYNTHETIC FIXTURE: authored demo data, fabricated IDs and scores; never live Qloo output.",
+  "success": true,
+  "results": {
+    "entities": [
+      {
+        "entity_id": "f0000000-0000-4000-8000-000000000011",
+        "name": "Patagonia",
+        "type": "urn:entity",
+        "subtype": "urn:entity:brand",
+        "popularity": 0.893,
+        "tags": [
+          {
+            "id": "urn:tag:genre:media:outdoors",
+            "name": "Outdoors",
+            "type": "urn:tag:genre:media"
+          }
+        ],
+        "properties": {
+          "description": "An outdoor clothing company."
+        },
+        "query": {
+          "affinity": 0.91,
+          "affinity_rank": 1
+        }
+      },
+      {
+        "entity_id": "f0000000-0000-4000-8000-000000000012",
+        "name": "LEGO",
+        "type": "urn:entity",
+        "subtype": "urn:entity:brand",
+        "popularity": 0.886,
+        "tags": [
+          {
+            "id": "urn:tag:genre:media:design",
+            "name": "Design",
+            "type": "urn:tag:genre:media"
+          }
+        ],
+        "description": "A construction toy brand.",
+        "affinity": 0.81
+      }
+    ],
+    "duration": 5
+  },
+  "query": {},
+  "duration": 5
+}

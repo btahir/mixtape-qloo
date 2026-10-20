@@ -1,0 +1,51 @@
+{
+  "fixture": true,
+  "fixture_notice": "SYNTHETIC FIXTURE: authored demo data, fabricated IDs and scores; never live Qloo output.",
+  "success": true,
+  "results": {
+    "entities": [
+      {
+        "entity_id": "f0000000-0000-4000-8000-000000000007",
+        "name": "Twin Peaks",
+        "type": "urn:entity",
+        "subtype": "urn:entity:tv_show",
+        "popularity": 0.921,
+        "tags": [
+          {
+            "id": "urn:tag:genre:media:mystery",
+            "name": "Mystery",
+            "type": "urn:tag:genre:media"
+          }
+        ],
+        "properties": {
+          "release_year": 1990,
+          "finale_year": null
+        },
+        "query": {
+          "affinity": 0.91,
+          "affinity_rank": 1
+        }
+      },
+      {
+        "entity_id": "f0000000-0000-4000-8000-000000000008",
+        "name": "Severance",
+        "type": "urn:entity",
+        "subtype": "urn:entity:tv_show",
+        "popularity": 0.914,
+        "tags": [
+          {
+            "id": "urn:tag:genre:media:drama",
+            "name": "Drama",
+            "type": "urn:tag:genre:media"
+          }
+        ],
+        "release_year": 2022,
+        "finale_year": null,
+        "affinity": 0.81
+      }
+    ],
+    "duration": 5
+  },
+  "query": {},
+  "duration": 5
+}

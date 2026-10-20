@@ -1,0 +1,51 @@
+{
+  "fixture": true,
+  "fixture_notice": "SYNTHETIC FIXTURE: authored demo data, fabricated IDs and scores; never live Qloo output.",
+  "success": true,
+  "results": {
+    "entities": [
+      {
+        "entity_id": "f0000000-0000-4000-8000-000000000001",
+        "name": "Spirited Away",
+        "type": "urn:entity",
+        "subtype": "urn:entity:movie",
+        "popularity": 0.963,
+        "tags": [
+          {
+            "id": "urn:tag:genre:media:fantasy",
+            "name": "Fantasy",
+            "type": "urn:tag:genre:media"
+          }
+        ],
+        "properties": {
+          "release_year": 2001,
+          "description": "An animated journey through a spirit world."
+        },
+        "query": {
+          "affinity": 0.91,
+          "affinity_rank": 1
+        }
+      },
+      {
+        "entity_id": "f0000000-0000-4000-8000-000000000002",
+        "name": "Am\u00e9lie",
+        "type": "urn:entity",
+        "subtype": "urn:entity:movie",
+        "popularity": 0.956,
+        "tags": [
+          {
+            "id": "urn:tag:genre:media:comedy",
+            "name": "Comedy",
+            "type": "urn:tag:genre:media"
+          }
+        ],
+        "release_year": 2001,
+        "description": "A Parisian finds connection through small acts of kindness.",
+        "affinity": 0.81
+      }
+    ],
+    "duration": 5
+  },
+  "query": {},
+  "duration": 5
+}

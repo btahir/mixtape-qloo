@@ -1,0 +1,50 @@
+{
+  "name": "mixtape",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": "24.x",
+    "bun": ">=1.4.2"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "next typegen && tsc --noEmit",
+    "lint": "eslint .",
+    "test": "vitest run --maxWorkers=2",
+    "test:e2e": "playwright test --workers=2",
+    "install:live": "vitest run --config vitest.live.config.ts scripts/install-live.test.ts --maxWorkers=1",
+    "prepare:live": "vitest run --config vitest.live.config.ts --maxWorkers=1",
+    "test:e2e:live": "playwright test --config playwright.live.config.ts --project=chromium --workers=2",
+    "test:e2e:release": "playwright test --config playwright.release.config.ts --workers=1"
+  },
+  "dependencies": {
+    "@ai-sdk/anthropic": "4.0.83",
+    "@base-ui/react": "1.9.0",
+    "@shiptiffin/sdk": "0.2.0",
+    "ai": "7.0.143",
+    "motion": "14.3.0",
+    "next": "16.4.2",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "server-only": "0.0.1",
+    "tailwindcss": "4.3.3",
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.1",
+    "@tailwindcss/postcss": "4.3.3",
+    "@types/node": "24.19.2",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "eslint": "9.39.5",
+    "eslint-config-next": "16.4.2",
+    "postcss": "8.5.30",
+    "typescript": "6.0.3",
+    "vitest": "5.0.5"
+  },
+  "license": "MIT",
+  "packageManager": "bun@1.4.2"
+}

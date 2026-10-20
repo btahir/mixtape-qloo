@@ -1,0 +1,326 @@
+{
+  "fixture": true,
+  "fixture_notice": "SYNTHETIC FIXTURE: authored demo data, fabricated IDs and scores; never live Qloo output.",
+  "success": true,
+  "results": [
+    {
+      "entity_id": "f0000000-0000-4000-8000-000000000001",
+      "name": "Spirited Away",
+      "type": "urn:entity",
+      "subtype": "urn:entity:movie",
+      "popularity": 0.963,
+      "tags": [
+        {
+          "id": "urn:tag:genre:media:fantasy",
+          "name": "Fantasy",
+          "type": "urn:tag:genre:media"
+        }
+      ],
+      "properties": {
+        "release_year": 2001,
+        "description": "An animated journey through a spirit world."
+      }
+    },
+    {
+      "entity_id": "f0000000-0000-4000-8000-000000000002",
+      "name": "Am\u00e9lie",
+      "type": "urn:entity",
+      "subtype": "urn:entity:movie",
+      "popularity": 0.956,
+      "tags": [
+        {
+          "id": "urn:tag:genre:media:comedy",
+          "name": "Comedy",
+          "type": "urn:tag:genre:media"
+        }
+      ],
+      "release_year": 2001,
+      "description": "A Parisian finds connection through small acts of kindness."
+    },
+    {
+      "entity_id": "f0000000-0000-4000-8000-000000000003",
+      "name": "Radiohead",
+      "type": "urn:entity",
+      "subtype": "urn:entity:artist",
+      "popularity": 0.949,
+      "tags": [
+        {
+          "id": "urn:tag:genre:media:alternative_rock",
+          "name": "Alternative Rock",
+          "type": "urn:tag:genre:media"
+        }
+      ],
+      "properties": {
+        "description": "An English band associated with alternative and experimental rock."
+      }
+    },
+    {
+      "entity_id": "f0000000-0000-4000-8000-000000000004",
+      "name": "Bj\u00f6rk",
+      "type": "urn:entity",
+      "subtype": "urn:entity:artist",
+      "popularity": 0.942,
+      "tags": [
+        {
+          "id": "urn:tag:genre:media:experimental",
+          "name": "Experimental",
+          "type": "urn:tag:genre:media"
+        }
+      ],
+      "description": "An Icelandic musician known for experimental pop."
+    },
+    {
+      "entity_id": "f0000000-0000-4000-8000-000000000005",
+      "name": "Dune",
+      "type": "urn:entity",
+      "subtype": "urn:entity:book",
+      "popularity": 0.935,
+      "tags": [
+        {
+          "id": "urn:tag:genre:media:science_fiction",
+          "name": "Science Fiction",
+          "type": "urn:tag:genre:media"
+        }
+      ],
+      "properties": {
+        "publication_year": 1965,
+        "author": "Frank Herbert",
+        "page_count": 412
+      }
+    },
+    {
+      "entity_id": "f0000000-0000-4000-8000-000000000006",
+      "name": "The Left Hand of Darkness",
+      "type": "urn:entity",
+      "subtype": "urn:entity:book",
+      "popularity": 0.928,
+      "tags": [
+        {
+          "id": "urn:tag:genre:media:science_fiction",
+          "name": "Science Fiction",
+          "type": "urn:tag:genre:media"
+        }
+      ],
+      "publication_year": 1969,
+      "author": "Ursula K. Le Guin",
+      "page_count": 304
+    },
+    {
+      "entity_id": "f0000000-0000-4000-8000-000000000007",
+      "name": "Twin Peaks",
+      "type": "urn:entity",
+      "subtype": "urn:entity:tv_show",
+      "popularity": 0.921,
+      "tags": [
+        {
+          "id": "urn:tag:genre:media:mystery",
+          "name": "Mystery",
+          "type": "urn:tag:genre:media"
+        }
+      ],
+      "properties": {
+        "release_year": 1990,
+        "finale_year": null
+      }
+    },
+    {
+      "entity_id": "f0000000-0000-4000-8000-000000000008",
+      "name": "Severance",
+      "type": "urn:entity",
+      "subtype": "urn:entity:tv_show",
+      "popularity": 0.914,
+      "tags": [
+        {
+          "id": "urn:tag:genre:media:drama",
+          "name": "Drama",
+          "type": "urn:tag:genre:media"
+        }
+      ],
+      "release_year": 2022,
+      "finale_year": null
+    },
+    {
+      "entity_id": "f0000000-0000-4000-8000-000000000009",
+      "name": "The Museum of Modern Art",
+      "type": "urn:entity",
+      "subtype": "urn:entity:place",
+      "popularity": 0.907,
+      "tags": [
+        {
+          "id": "urn:tag:genre:media:art",
+          "name": "Art",
+          "type": "urn:tag:genre:media"
+        }
+      ],
+      "properties": {
+        "address": "11 W 53rd St, New York, NY",
+        "geocode": {
+          "city": "New York",
+          "country_code": "US"
+        },
+        "description": "An art museum in Midtown Manhattan."
+      },
+      "location": {
+        "latitude": 40.7614,
+        "longitude": -73.9776
+      }
+    },
+    {
+      "entity_id": "f0000000-0000-4000-8000-000000000010",
+      "name": "Shakespeare and Company",
+      "type": "urn:entity",
+      "subtype": "urn:entity:place",
+      "popularity": 0.9,
+      "tags": [
+        {
+          "id": "urn:tag:genre:media:books",
+          "name": "Books",
+          "type": "urn:tag:genre:media"
+        }
+      ],
+      "address": "37 Rue de la B\u00fbcherie, Paris",
+      "geocode": {
+        "city": "Paris",
+        "country_code": "FR"
+      },
+      "description": "An English-language bookshop in Paris.",
+      "location": {
+        "latitude": 48.8526,
+        "longitude": 2.3472
+      }
+    },
+    {
+      "entity_id": "f0000000-0000-4000-8000-000000000011",
+      "name": "Patagonia",
+      "type": "urn:entity",
+      "subtype": "urn:entity:brand",
+      "popularity": 0.893,
+      "tags": [
+        {
+          "id": "urn:tag:genre:media:outdoors",
+          "name": "Outdoors",
+          "type": "urn:tag:genre:media"
+        }
+      ],
+      "properties": {
+        "description": "An outdoor clothing company."
+      }
+    },
+    {
+      "entity_id": "f0000000-0000-4000-8000-000000000012",
+      "name": "LEGO",
+      "type": "urn:entity",
+      "subtype": "urn:entity:brand",
+      "popularity": 0.886,
+      "tags": [
+        {
+          "id": "urn:tag:genre:media:design",
+          "name": "Design",
+          "type": "urn:tag:genre:media"
+        }
+      ],
+      "description": "A construction toy brand."
+    },
+    {
+      "entity_id": "f0000000-0000-4000-8000-000000000013",
+      "name": "Hayao Miyazaki",
+      "type": "urn:entity",
+      "subtype": "urn:entity:person",
+      "popularity": 0.879,
+      "tags": [
+        {
+          "id": "urn:tag:genre:media:animation",
+          "name": "Animation",
+          "type": "urn:tag:genre:media"
+        }
+      ],
+      "properties": {
+        "description": "A Japanese animation director."
+      }
+    },
+    {
+      "entity_id": "f0000000-0000-4000-8000-000000000014",
+      "name": "David Lynch",
+      "type": "urn:entity",
+      "subtype": "urn:entity:person",
+      "popularity": 0.872,
+      "tags": [
+        {
+          "id": "urn:tag:genre:media:film",
+          "name": "Film",
+          "type": "urn:tag:genre:media"
+        }
+      ],
+      "description": "An American filmmaker."
+    },
+    {
+      "entity_id": "f0000000-0000-4000-8000-000000000015",
+      "name": "99% Invisible",
+      "type": "urn:entity",
+      "subtype": "urn:entity:podcast",
+      "popularity": 0.865,
+      "tags": [
+        {
+          "id": "urn:tag:genre:media:design",
+          "name": "Design",
+          "type": "urn:tag:genre:media"
+        }
+      ],
+      "properties": {
+        "episode_count": "500",
+        "description": "A podcast about design and the built environment."
+      }
+    },
+    {
+      "entity_id": "f0000000-0000-4000-8000-000000000016",
+      "name": "Radiolab",
+      "type": "urn:entity",
+      "subtype": "urn:entity:podcast",
+      "popularity": 0.858,
+      "tags": [
+        {
+          "id": "urn:tag:genre:media:science",
+          "name": "Science",
+          "type": "urn:tag:genre:media"
+        }
+      ],
+      "episode_count": "300",
+      "description": "A podcast exploring science and human experience."
+    },
+    {
+      "entity_id": "f0000000-0000-4000-8000-000000000017",
+      "name": "Journey",
+      "type": "urn:entity",
+      "subtype": "urn:entity:videogame",
+      "popularity": 0.851,
+      "tags": [
+        {
+          "id": "urn:tag:genre:media:adventure",
+          "name": "Adventure",
+          "type": "urn:tag:genre:media"
+        }
+      ],
+      "properties": {
+        "release_year": 2012,
+        "platforms": "PlayStation 3, PC"
+      }
+    },
+    {
+      "entity_id": "f0000000-0000-4000-8000-000000000018",
+      "name": "Stardew Valley",
+      "type": "urn:entity",
+      "subtype": "urn:entity:videogame",
+      "popularity": 0.844,
+      "tags": [
+        {
+          "id": "urn:tag:genre:media:simulation",
+          "name": "Simulation",
+          "type": "urn:tag:genre:media"
+        }
+      ],
+      "release_year": 2016,
+      "platforms": ["PC", "Nintendo Switch"]
+    }
+  ],
+  "duration": 3
+}

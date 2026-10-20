@@ -1,0 +1,32 @@
+{
+  "fixture": true,
+  "fixture_notice": "SYNTHETIC FIXTURE: authored demo data, fabricated IDs and scores; never live Qloo output.",
+  "success": true,
+  "results": {
+    "tags": [
+      {
+        "id": "urn:tag:genre:media:science_fiction",
+        "name": "Science Fiction",
+        "type": "urn:tag:genre:media",
+        "query": {
+          "affinity": 0.88
+        }
+      },
+      {
+        "tag_id": "urn:tag:genre:media:mystery",
+        "tag_value": "urn:tag:genre:media:mystery",
+        "name": "Mystery",
+        "subtype": "urn:tag:genre:media",
+        "types": ["urn:entity:movie", "urn:entity:book"],
+        "query": {}
+      },
+      {
+        "id": "urn:tag:genre:media:fantasy",
+        "name": "Fantasy",
+        "type": "urn:tag:genre:media",
+        "affinity": 0.74
+      }
+    ]
+  },
+  "duration": 2
+}

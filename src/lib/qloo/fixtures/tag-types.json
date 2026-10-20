@@ -1,0 +1,12 @@
+{
+  "fixture": true,
+  "fixture_notice": "SYNTHETIC FIXTURE: authored demo data, fabricated IDs and scores; never live Qloo output.",
+  "success": true,
+  "results": [
+    {
+      "id": "urn:tag:genre:media",
+      "name": "Media genres"
+    }
+  ],
+  "duration": 1
+}

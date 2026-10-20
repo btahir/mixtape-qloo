@@ -1,0 +1,50 @@
+import { openPieceOptions } from "./piece-options";
+import { test, expect } from "./fixture";
+
+test("current-gift review reopens after sharing; editing targets tastes and undo restores focus", async ({ page, browser }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "Try this exchange", exact: true }).first().click();
+  await page.getByRole("button", { name: "Make their mixtape", exact: true }).click();
+  await page.getByRole("button", { name: "Create share link", exact: true }).first().click();
+  await page.getByRole("button", { name: "Create link", exact: true }).click();
+  const link = await page.getByLabel("Their link", { exact: true }).inputValue();
+  await page.getByRole("button", { name: "Done", exact: true }).click();
+  await page.getByRole("button", { name: "Create share link", exact: true }).first().click();
+  await expect(page.getByRole("button", { name: "Create link", exact: true })).toBeVisible();
+  await expect(page.getByLabel("Their link", { exact: true })).toHaveCount(0);
+  await expect(page.getByText("Previously shared links", { exact: true })).toBeVisible();
+  await page.keyboard.press("Escape");
+  await page.locator(".edition-menu > summary").click();
+  await page.getByRole("button", { name: "Edit tastes", exact: true }).click();
+  await expect(page.locator("#tastes").getByRole("combobox")).toBeFocused();
+  await expect(page.getByRole("button", { name: "Close editing", exact: true })).toHaveAttribute("aria-expanded", "true");
+  const context = await browser.newContext({ extraHTTPHeaders: { "x-forwarded-for": "192.0.2.211" } });
+  const recipient = await context.newPage(); await recipient.goto(link);
+  await recipient.getByRole("button", { name: "Open your mixtape", exact: true }).click();
+  const book = recipient.locator('[data-kind="book"]');
+  const title = await book.getByRole("heading").textContent();
+    await openPieceOptions(book);
+  await book.getByRole("button", { name: "Already know this", exact: true }).click();
+  await recipient.getByRole("button", { name: "Find another", exact: true }).click();
+  await expect(book.getByRole("heading")).not.toHaveText(title!);
+  await openPieceOptions(book);
+  await book.getByRole("button", { name: "Undo replacement", exact: true }).click();
+  await expect(book.locator("article")).toBeFocused();
+  await expect(book.getByRole("heading")).toHaveText(title!);
+  await expect(recipient.locator(".owner-view")).toHaveCount(0);
+  await page.goto(link);
+  await expect(page.locator(".owner-view")).toContainText("Viewing as recipient");
+  await expect(page.getByRole("link", { name: "Back to your draft" })).toHaveAttribute("href", /\/make\//);
+  await context.close();
+});
+
+test("keyboard preparation transfers focus to Stop and back without losing the draft", async ({ page }) => {
+  await page.goto("/"); await page.getByRole("button", { name: "Try this exchange", exact: true }).first().click();
+  await page.route("**/api/agent", () => {});
+  const make = page.getByRole("button", { name: "Make their mixtape", exact: true });
+  await make.focus(); await page.keyboard.press("Enter");
+  const stop = page.getByRole("button", { name: "Stop", exact: true });
+  await expect(stop).toBeFocused(); await page.keyboard.press("Enter");
+  await expect(page.locator(".recovery")).toContainText("Stopped. Your draft is still here.");
+  await expect(make).toBeFocused();
+});
