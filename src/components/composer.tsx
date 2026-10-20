@@ -32,6 +32,7 @@ import { ChoiceChange } from "./choice-change";
 import { Sheet } from "./ui/sheet";
 import { ShareSheet } from "./share-sheet";
 import { RunStatus } from "./run-status";
+import { Receiver } from "./receiver";
 import { useOnline } from "./network";
 import { changedWords, applyWords, wordConflicts, type Words } from "@/lib/draft-text";
 export function Composer({ initial, openGift = false, example }: { initial: Draft; openGift?: boolean; example?: TasteExample }) {
@@ -51,6 +52,7 @@ export function Composer({ initial, openGift = false, example }: { initial: Draf
     [returnIds, setReturnIds] = useState<string[]>(initial.returnCandidates?.map((e) => e.id) ?? []),
     [noteKind, setNoteKind] = useState<Kind | null>(null),
     [preview, setPreview] = useState(openGift),
+    [receiving, setReceiving] = useState(openGift && !!initial.sampleId),
     [previewOpened, setPreviewOpened] = useState(false),
     [startedAt, setStartedAt] = useState(0),
     [showInputs, setShowInputs] = useState(!current(initial));
@@ -330,6 +332,26 @@ export function Composer({ initial, openGift = false, example }: { initial: Draf
     draft.tastes.length < 3 ||
     draft.shelf.length < 6 ||
     draft.categories.some((k) => eligibility(draft, k).length < 2);
+  if (preview && result && receiving)
+    return (
+      <Receiver
+        initial={{
+          id: draft.id, generation: 0, mode: draft.mode, sampleId: draft.sampleId,
+          sender: draft.sender, recipient: draft.recipient, introduction: draft.introduction,
+          tastes: draft.tastes, repairEnabled: true, expiresAt: draft.expiresAt, slots: result.slots,
+          ordinals: Object.fromEntries(result.slots.map((slot, index) => [slot.kind, index])),
+        }}
+        sample={{
+          draftId: draft.id,
+          example,
+          onEdit: () => {
+            setReceiving(false);
+            setPreview(false);
+            requestAnimationFrame(() => { scrollTo(0, 0); previewButton.current?.focus(); });
+          },
+        }}
+      />
+    );
   if (preview && result)
     return (
       <section
@@ -338,9 +360,9 @@ export function Composer({ initial, openGift = false, example }: { initial: Draf
         {draft.mode === "fixture" && (
           <p className="fixture-notice">Sample mode · No live Qloo calls</p>
         )}
-        <p className="eyebrow">{openGift ? "Fictional exchange · Your private sample" : "Preview · Only you can see this draft"}</p>
+        <p className="eyebrow">Preview · Only you can see this draft</p>
         <button ref={backButton} className="preview-back" onClick={() => { setPreview(false); requestAnimationFrame(() => previewButton.current?.focus()); }}>
-          {openGift ? "Make this yours / share" : "Back to editing"}
+          Back to editing
         </button>
         <h1 ref={headingRef} tabIndex={-1}>
           {previewOpened

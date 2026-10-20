@@ -16,7 +16,11 @@ import { RunStatus } from "./run-status";
 import { Sheet } from "./ui/sheet";
 import { useOnline } from "./network";
 import { CooldownMessage, useCooldown } from "./use-cooldown";
-export function Receiver({ initial, token, ownerDraftId }: { initial: Gift; token: string; ownerDraftId?: string }) {
+import { TasteExampleView, type TasteExample } from "./taste-example";
+const expiryFormat = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
+/** A private sample opens through its owner's draft; a gift link opens through its token. */
+export type SampleSession = { draftId: string; example?: TasteExample; onEdit: () => void };
+export function Receiver({ initial, token, ownerDraftId, sample }: { initial: Gift; token?: string; ownerDraftId?: string; sample?: SampleSession }) {
   const router = useRouter();
   const [gift, setGift] = useState(initial),
     [opened, setOpened] = useState(!!initial.receiptId),
@@ -35,6 +39,7 @@ export function Receiver({ initial, token, ownerDraftId }: { initial: Gift; toke
     [resetAt, setResetAt] = useState<number>();
   const online = useOnline();
   const cooling = useCooldown(resetAt);
+  const openPath = sample ? `/api/drafts/${sample.draftId}/sample-receipt` : `/api/receive/${token}/open`;
   const pending = pendingRunId !== null || (!!run && ["accepted", "running"].includes(run.status));
   const savedToggle = useRef<HTMLButtonElement>(null);
   const heading = useRef<HTMLHeadingElement>(null);
@@ -65,23 +70,23 @@ export function Receiver({ initial, token, ownerDraftId }: { initial: Gift; toke
       if (["accepted", "running"].includes(latest.status)) setError("The connection was interrupted.");
       else if (latest.error) setError(latest.error);
       if (!["accepted", "running"].includes(latest.status) && (latest.resultVersion ?? 0) > (initial.version ?? 0)) {
-        const next = await api<Gift>(`/api/receive/${token}/open`);
+        const next = await api<Gift>(openPath);
         if (!cancelled) { setGift(next); setOpened(true); }
       }
       if (!cancelled && !["accepted", "running"].includes(latest.status)) setPendingRunId(null);
     }).catch(async (error) => {
       if (cancelled) return;
       if (error instanceof RequestError && error.status === 404) {
-        try { const next = await api<Gift>(`/api/receive/${token}/open`); if (!cancelled) { setGift(next); setPendingRunId(null); } return; } catch {}
+        try { const next = await api<Gift>(openPath); if (!cancelled) { setGift(next); setPendingRunId(null); } return; } catch {}
       }
       if (!cancelled) setError("The connection was interrupted. Check latest version before making new choices.");
     });
     return () => { cancelled = true; };
-  }, [initial.id, initial.generation, initial.version, token]);
+  }, [initial.id, initial.generation, initial.version, openPath]);
   useEffect(() => { if (pendingRunId === null) { try { sessionStorage.removeItem(`mixtape-receipt-run:${initial.id}:${initial.generation}`); } catch {} } }, [pendingRunId, initial.id, initial.generation]);
   async function open() {
     try {
-      setGift(await api<Gift>(`/api/receive/${token}/open`));
+      setGift(await api<Gift>(openPath));
     } catch (e) {
       setError(message(e));
       throw e;
@@ -152,13 +157,13 @@ export function Receiver({ initial, token, ownerDraftId }: { initial: Gift; toke
         runController.current.signal,
       );
       if (r.status === "ready") {
-        setGift(await api<Gift>(`/api/receive/${token}/open`));
+        setGift(await api<Gift>(openPath));
         focusSlot.current = repair;
         setNotice(`Another ${singular[repair]}, from the same shelf. The other pieces stayed exactly as they were.`);
         setRepair(null);
       } else if (r.error) { setError(r.error); setResetAt(r.failure?.resetAt); }
       else if (r.status === "needs_input") {
-        setGift(await api<Gift>(`/api/receive/${token}/open`));
+        setGift(await api<Gift>(openPath));
         setError(
           r.events.findLast((e) => e.type === "needs_input")?.label ??
             "Add another favourite or change the tastes.",
@@ -185,22 +190,39 @@ export function Receiver({ initial, token, ownerDraftId }: { initial: Gift; toke
       setEvents(latest.events);
       setResetAt(latest.failure?.resetAt);
       if (latest.status === "ready") {
-        setGift(await api<Gift>(`/api/receive/${token}/open`));
+        setGift(await api<Gift>(openPath));
         focusSlot.current = repair;
         setRepair(null);
         setError("");
       } else if (latest.error) setError(latest.error);
       else if (["accepted", "running"].includes(latest.status)) setError("The connection was interrupted.");
-      else { setGift(await api<Gift>(`/api/receive/${token}/open`)); setError(""); }
+      else { setGift(await api<Gift>(openPath)); setError(""); }
       if (!["accepted", "running"].includes(latest.status)) setPendingRunId(null);
     } catch (error) {
       if (error instanceof RequestError && error.status === 404) {
-        try { setGift(await api<Gift>(`/api/receive/${token}/open`)); setPendingRunId(null); setRun(null); setError(""); return; } catch {}
+        try { setGift(await api<Gift>(openPath)); setPendingRunId(null); setRun(null); setError(""); return; } catch {}
       }
       setError("The connection was interrupted. Check latest version before making new choices.");
     }
   }
   const latestButton = pending && !busy && <button disabled={!online} onClick={() => void checkLatest()}>Check latest version</button>;
+  async function makeOneBack() {
+    if (mutating) return;
+    setMutating(true);
+    try {
+      const d = await api<Draft>("/api/drafts", "POST", sample
+        ? { source: "return", receiptRef: gift.receiptId }
+        : { source: "return", shareRef: token });
+      router.push(`/make/${d.id}`);
+    } catch (e) {
+      setError(message(e));
+      setMutating(false);
+    }
+  }
+  const returnDisabled = !online || busy || mutating || !gift.receiptId;
+  // One quiet invitation on the sample's middle piece, until the first repair.
+  const inviteKind = sample && gift.repairEnabled && gift.receiptId && !gift.undoKind && !gift.known?.length && !gift.declined?.length
+    ? gift.slots[Math.min(1, gift.slots.length - 1)]?.kind : undefined;
   return (
     <div
       className={`receiver ${opened ? "receiver-opened" : "receiver-closed"}`}
@@ -210,9 +232,10 @@ export function Receiver({ initial, token, ownerDraftId }: { initial: Gift; toke
         <p className="fixture-notice">Sample mode · No live Qloo calls</p>
       )}
       <p className="eyebrow">
-        {opened ? "A little of their world" : "The good kind of mail"}
+        {sample ? `Fictional exchange · You are ${gift.recipient || "the recipient"}` : opened ? "A little of their world" : "The good kind of mail"}
       </p>
-      {gift.sampleId && <p className="fictional">Fictional exchange</p>}
+      {sample ? <button className="preview-back" onClick={sample.onEdit}>Make this yours / share</button>
+        : gift.sampleId && <p className="fictional">Fictional exchange</p>}
       <h1 ref={heading} tabIndex={-1}>
         {opened
           ? `From ${gift.sender || "your friend"}, for ${gift.recipient || "you"}`
@@ -235,25 +258,10 @@ export function Receiver({ initial, token, ownerDraftId }: { initial: Gift; toke
       ) : (
         <>
           {gift.introduction && <p className="keepsake-note">{gift.introduction}<span> — {gift.sender || "Your friend"}</span></p>}
-          <button className="return-gift"
-            disabled={!online || busy || mutating || !gift.receiptId}
-            onClick={async () => {
-              if (mutating) return;
-              setMutating(true);
-              try {
-                const d = await api<Draft>("/api/drafts", "POST", {
-                  source: "return",
-                  shareRef: token,
-                });
-                router.push(`/make/${d.id}`);
-              } catch (e) {
-                setError(message(e));
-                setMutating(false);
-              }
-            }}
-          >
+          <button className="return-gift" disabled={returnDisabled} onClick={() => void makeOneBack()}>
             Make one back
           </button>
+          {sample && <TasteExampleView example={sample.example} />}
           {!gift.receiptId && <p role="status">This gift is read-only right now. You can still explore every piece.</p>}
           <div className={`opened${unwrapping ? " gift-arriving" : ""}`} onAnimationEnd={(event) => { if (event.animationName === "insert-arrives" && (event.target as HTMLElement).closest("li")?.matches(":last-child")) setUnwrapping(false); }}>
             {savedOnly && <section className="saved-collection">
@@ -269,6 +277,11 @@ export function Receiver({ initial, token, ownerDraftId }: { initial: Gift; toke
               sender={gift.sender}
               recipient
               ordinals={gift.ordinals}
+              invitation={(s) => s.kind === inviteKind && (
+                <button className="known-invite" disabled={!online || busy || mutating} onClick={() => void action(s.kind, "known")}>
+                  {s.kind === "movie" ? "Seen it already?" : s.kind === "book" ? "Read it already?" : "Know them already?"} <span>Ask for another {singular[s.kind]}</span>
+                </button>
+              )}
               actions={(s) => (
                 <>
                   {gift.known?.includes(s.entity.id) && <p>Already known</p>}
@@ -317,7 +330,7 @@ export function Receiver({ initial, token, ownerDraftId }: { initial: Gift; toke
             />}
           </div>
           <p className="fine-print">
-            Your saves and skips stay private. Return to them through this gift link.
+            {sample ? "Your saves and skips stay in this browser. Nothing here is shared." : "Your saves and skips stay private. Return to them through this gift link."}
           </p>
           <button ref={savedToggle} onClick={() => setSavedOnly((v) => !v)}>
             {savedOnly ? "Show all pieces" : "Your saved pieces"}
@@ -329,6 +342,15 @@ export function Receiver({ initial, token, ownerDraftId }: { initial: Gift; toke
                 <p>Keep anything you want to come back to.</p>
               </>
             )}
+          {sample && <section className="sample-next" aria-labelledby="sample-next-title">
+            <p className="eyebrow">Your turn</p>
+            <h2 id="sample-next-title">Send {gift.sender || "them"} <em>something back.</em></h2>
+            <p>Mixtape starts a return gift with {gift.sender ? `${gift.sender}’s` : "their"} three pieces as the tastes to match. You add a few favourites of your own, and it picks from those.</p>
+            <div className="sample-next-actions">
+              <button className="primary" disabled={returnDisabled} onClick={() => void makeOneBack()}>Make one back</button>
+              <button className="secondary" onClick={sample.onEdit}>Use this for a real friend</button>
+            </div>
+          </section>}
 
         </>
       )}
@@ -432,7 +454,7 @@ export function Receiver({ initial, token, ownerDraftId }: { initial: Gift; toke
       {!repair && latestButton}
       {!repair && error && <p role="alert">{error}</p>}
       <p role="status">{notice}</p>
-      <p>Available until {new Date(gift.expiresAt).toLocaleDateString()}</p>
+      {!sample && <p>Available until {expiryFormat.format(gift.expiresAt)}</p>}
     </div>
   );
 }

@@ -2791,3 +2791,25 @@ main:has(.compose-actions) { padding-bottom: var(--compose-bar-height, 160px); }
   .entity-art-wrap.with-art.media-artist .cover-title { height: 90px; }
   .composer.has-result .result-toolbar > div > p:first-child { display: none; }
 }
+
+/* Private sample: one quiet repair invitation, then a clear next step. */
+.insert-info > .known-invite { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; width: 100%; border: 0; border-bottom: 1px solid var(--line); background: none; padding: 12px 0; min-height: 52px; text-align: left; font-size: 14px; color: var(--muted); text-decoration: none; }
+.insert-info > .known-invite span { color: var(--accent); text-decoration: underline; text-underline-offset: 4px; font-weight: 500; }
+.insert-info > .known-invite:hover:not(:disabled) { background: none; color: var(--ink); }
+.sample-next { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 12px 48px; align-items: end; margin: 40px 0 8px; padding: 36px 40px; background: var(--ink); color: var(--paper); }
+.sample-next .eyebrow { grid-column: 1 / -1; margin: 0; color: var(--yellow); }
+.sample-next h2 { margin: 0; font-size: clamp(32px, 3.4vw, 48px); line-height: 1.02; letter-spacing: -0.045em; color: var(--paper); }
+.sample-next h2 em { font-family: var(--serif); font-weight: 400; letter-spacing: -0.02em; }
+.sample-next p:not(.eyebrow) { margin: 0 0 16px; color: #d9ddd2; font-size: 15px; max-width: 460px; }
+.sample-next-actions { grid-column: 2; display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; }
+.sample-next h2 { grid-row: span 2; align-self: start; }
+.sample-next button.primary { background: var(--paper); color: var(--ink); border-color: var(--paper); }
+.sample-next button.primary:hover:not(:disabled) { background: var(--white); }
+.sample-next button.secondary { color: var(--paper); }
+.sample-next button.secondary:hover { background: transparent; color: var(--yellow); }
+@media (max-width: 760px) {
+  .sample-next { grid-template-columns: 1fr; padding: 28px 20px; margin-top: 28px; }
+  .sample-next-actions { grid-column: 1; flex-direction: column; align-items: stretch; }
+  .sample-next h2 { grid-row: auto; }
+  .sample-next button.primary { justify-content: space-between; display: flex; align-items: center; }
+}

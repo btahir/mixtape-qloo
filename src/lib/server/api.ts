@@ -21,6 +21,7 @@ import {
   manageShare,
   openReceipt,
   receiptAction,
+  sampleReceipt,
 } from "./repository";
 import { search, qlooFailure } from "./qloo";
 import { kindSchema } from "../domain";
@@ -86,12 +87,13 @@ export async function dispatch(
             source: z.enum(["empty", "sample", "fixture", "return", "repeat"]),
             sampleId: z.string().optional(),
             shareRef: z.string().max(200).optional(),
+            receiptRef: z.string().max(100).optional(),
           })
           .strict()
           .parse(raw);
         await rate("create", owner, ip);
         await counter("draft-create:global", 1000, 86400000);
-        return json(await createDraft(owner, p.source, p.sampleId, p.shareRef));
+        return json(await createDraft(owner, p.source, p.sampleId, p.shareRef, p.receiptRef));
       }
     }
     if (path[0] === "drafts" && path[1]) {
@@ -125,6 +127,10 @@ export async function dispatch(
             p.list,
           ),
         );
+      }
+      if (method === "POST" && path.length === 3 && path[2] === "sample-receipt") {
+        z.object({}).strict().parse(raw);
+        return json(await sampleReceipt(id, owner));
       }
       if (method === "GET" && path.length === 3 && path[2] === "shares")
         return json({ links: await ownedLinks(id, owner) });

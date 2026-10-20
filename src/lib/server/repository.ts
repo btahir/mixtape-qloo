@@ -82,6 +82,7 @@ export async function createDraft(
   source: "empty" | "sample" | "fixture" | "return" | "repeat",
   sampleId?: string,
   shareRef?: string,
+  receiptRef?: string,
 ) {
   if ((source === "empty" || source === "sample") && process.env.QLOO_MODE === "live" && !process.env.QLOO_API_KEY)
     throw new AppError(503, "We cannot reach Qloo with this setup.");
@@ -115,8 +116,9 @@ export async function createDraft(
       throw new AppError(503, "This live exchange is not ready yet. Open an illustrative sample, or start with your own favourites.");
   }
   if (source === "return") {
-    if (!shareRef) throw gone();
-    const s = await publicShare(shareRef);
+    if (!shareRef && !receiptRef) throw gone();
+    // A private sample receipt returns through its owner's receipt, never a link.
+    const s = receiptRef ? (await ownedReceipt(receiptRef, owner)).s : await publicShare(shareRef!);
     d = {
       ...d,
       mode: s.mode,
@@ -603,7 +605,59 @@ export async function openReceipt(token: string, owner: string) {
   }
 }
 async function allocateReceipt(token: string, owner: string) {
-  const s = await publicShare(token);
+  return allocateFor(await publicShare(token), owner);
+}
+const sampleShareSchema = z.object({ shareId: z.string(), revisionId: z.string() }).strict();
+/**
+ * A private receiving session for a fictional sample. It is a share record with no
+ * bearer token, so no link can open it, and it never enters the draft's publication
+ * history. Repairs run through the same receipt, exclusion and ranking path as a link.
+ */
+export async function sampleReceipt(draftId: string, owner: string) {
+  const d = await owned(draftId, owner);
+  const r = current(d);
+  if (!d.sampleId) throw new AppError(400, "Only a sample gift opens here.");
+  if (!r || r.slots.length !== d.categories.length || r.slots.some((s, i) => s.kind !== d.categories[i]) ||
+      r.slots.some((s) => (s.previousTastes || s.previousShelf) && !s.locked))
+    throw new AppError(400, "Make their mixtape first.");
+  const key = `sample-share:${owner}:${d.id}`;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const raw = await store().get(key);
+    const pointer = raw ? sampleShareSchema.parse(JSON.parse(raw)) : null;
+    const existing = pointer?.revisionId === r.id ? await read(`share:${pointer.shareId}`, shareSchema) : null;
+    if (existing && !existing.revoked && existing.expiresAt > Date.now()) return allocateFor(existing, owner);
+    const pool = d.shelf.filter((e) =>
+      !d.tastes.some((t) => t.id === e.entity.id) && !d.known.includes(e.entity.id) && !d.excluded.includes(e.entity.id));
+    const s: Share = {
+      id: opaque(),
+      owner,
+      draftId: d.id,
+      tokenHashes: [],
+      generation: 0,
+      mode: d.mode,
+      sampleId: d.sampleId,
+      sender: d.sender,
+      recipient: d.recipient,
+      introduction: d.introduction,
+      tastes: d.tastes,
+      revision: structuredClone(r),
+      pool,
+      repairEnabled: pool.some((e) => !r.slots.some((x) => x.entity.id === e.entity.id)),
+      revoked: false,
+      createdAt: new Date().toISOString(),
+      expiresAt: Math.min(d.expiresAt, Date.now() + MONTH),
+      idempotencyKey: `sample:${r.id}`,
+      inputHash: hash(`sample:${d.id}:${r.id}`),
+    };
+    const ttlMs = s.expiresAt - Date.now();
+    if (await store().batchCas([
+      { key: `share:${s.id}`, old: null, value: JSON.stringify(shareSchema.parse(s)), ttlMs },
+      { key, old: raw, value: JSON.stringify({ shareId: s.id, revisionId: r.id }), ttlMs },
+    ])) return allocateFor(s, owner);
+  }
+  throw conflict();
+}
+async function allocateFor(s: Share, owner: string) {
   const key = receiptIndexKey(owner, s);
   const rid = await update(
     key,
